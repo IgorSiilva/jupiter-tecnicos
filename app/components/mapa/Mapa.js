@@ -248,12 +248,12 @@ class Mapa extends Component {
       ); */
 
 
-       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
+/*        this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
           this.state.arrayRotasParaTerminais.push(response);
           this.forceUpdate();
         }
-      );
+      ); */
 
     this.setState(
       {
@@ -267,7 +267,7 @@ class Mapa extends Component {
       }
     );
 
-/*     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
+     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
       const coordenadaTerminal = response.waypoints[0].location; // [longitude, latitude]
       obterCoordenadaMaisProxima(this.state.coordenadasDispositivo).then(
         response => {
@@ -295,7 +295,7 @@ class Mapa extends Component {
           });
         }
       );
-    }); */
+    });
   }
 //}
 
