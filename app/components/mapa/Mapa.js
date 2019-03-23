@@ -178,7 +178,7 @@ class Mapa extends Component {
     const LATITUDE = 1;
     const LONGITUDE = 0;
 
-    /*     if (
+    if (
       quantidadeTerminaisSelecionados == 2 &&
       this.state.posicaoProximoTerminalARemover == 0
     ) {
@@ -229,7 +229,7 @@ class Mapa extends Component {
         latitude,
         longitude
       });
-      this.state.arrayCodigoTerminaisSelecionados.push(terminal.codigo); */
+      this.state.arrayCodigoTerminaisSelecionados.push(terminal.codigo);
 
     /*       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
@@ -246,13 +246,12 @@ class Mapa extends Component {
           this.forceUpdate();
         }
       ); */
-
-    /*       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
+       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
           this.state.arrayRotasParaTerminais.push(response);
           this.forceUpdate();
         }
-      ); */
+      );
 
     this.setState(
       {
@@ -266,7 +265,7 @@ class Mapa extends Component {
       }
     );
 
-    obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
+/*     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
       const coordenadaTerminal = response.waypoints[0].location; // [longitude, latitude]
       obterCoordenadaMaisProxima(this.state.coordenadasDispositivo).then(
         response => {
@@ -294,8 +293,9 @@ class Mapa extends Component {
           });
         }
       );
-    });
+    }); */
   }
+}
 
   render() {
     return (
