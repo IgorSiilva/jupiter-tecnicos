@@ -174,6 +174,9 @@ class Mapa extends Component {
   }
 
   tracarRotaParaTerminal(terminal, quantidadeTerminaisSelecionados) {
+    this.setState({
+        carregando : true
+    })
     const { latitude, longitude } = terminal;
     const LATITUDE = 1;
     const LONGITUDE = 0;
@@ -190,17 +193,13 @@ class Mapa extends Component {
       this.state.arrayCodigoTerminaisSelecionados.splice(0, 1, terminal.codigo);
       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
-          this.state.arrayRotasParaTerminais.splice(
-            0,
-            1,
-            response.routes[0].geometry.coordinates
-          );
+          this.state.arrayRotasParaTerminais.splice(0, 1, response);
+          this.setState({
+            posicaoProximoTerminalARemover: 1,
+            carregando : false
+          });
         }
       );
-
-      this.setState({
-        posicaoProximoTerminalARemover: 1
-      });
     } else if (
       quantidadeTerminaisSelecionados == 2 &&
       this.state.posicaoProximoTerminalARemover == 1
@@ -213,16 +212,13 @@ class Mapa extends Component {
       this.state.arrayCodigoTerminaisSelecionados.splice(1, 1, terminal.codigo);
       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
-          this.state.arrayRotasParaTerminais.splice(
-            1,
-            1,
-            response.routes[0].geometry.coordinates
-          );
+          this.state.arrayRotasParaTerminais.splice(1, 1, response);
+          this.setState({
+            carregando : false,
+            posicaoProximoTerminalARemover: 0
+        })
         }
       );
-      this.setState({
-        posicaoProximoTerminalARemover: 0
-      });
     } else {
       this.state.arrayTerminaisSelecionados.push(terminal);
       this.state.arrayPosicaoTerminaisSelecionados.push({
@@ -230,78 +226,22 @@ class Mapa extends Component {
         longitude
       });
       this.state.arrayCodigoTerminaisSelecionados.push(terminal.codigo);
-
-    /*       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
-        response => {
-          const resultado = response.routes[0].geometry.coordinates.map(
-            async coordenada => ({
-              longitude: coordenada[0],
-              latitude: coordenada[1]
-            })
-          );
-
-          Promise.all(resultado).then(response => {
-            this.state.arrayRotasParaTerminais.push(response);
-          });
-          this.forceUpdate();
-        }
-      ); */
-       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
+      this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
         response => {
           this.state.arrayRotasParaTerminais.push(response);
-          this.forceUpdate();
+          this.setState({
+              carregando : false
+          })
         }
       );
-
-    this.setState(
-      {
-        carregando: true,
-        terminalSelecionado: terminal,
-        posicaoTerminalSelecionado: { latitude, longitude },
-        codigoTerminalSelecionado: terminal.codigo
-      },
-      () => {
-        console.log(this.state);
-      }
-    );
-
-/*     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
-      const coordenadaTerminal = response.waypoints[0].location; // [longitude, latitude]
-      obterCoordenadaMaisProxima(this.state.coordenadasDispositivo).then(
-        response => {
-          const coordenadaDispositivo = response.waypoints[0].location;
-          obterRotaEntreDoisPontos(
-            {
-              latitude: coordenadaDispositivo[LATITUDE],
-              longitude: coordenadaDispositivo[LONGITUDE]
-            },
-            {
-              latitude: coordenadaTerminal[LATITUDE],
-              longitude: coordenadaTerminal[LONGITUDE]
-            }
-          ).then(response => {
-            //console.log(response)
-            this.setState(
-              {
-                rotaParaTerminal: response.routes[0].geometry.coordinates,
-                carregando: false
-              },
-              () => {
-                console.log(this.state);
-              }
-            );
-          });
-        }
-      );
-    }); */
+    }
   }
-}
 
   render() {
     return (
       <Container style={{ zIndex: 1 }}>
         <StatusBar backgroundColor="#F78154" barStyle="light-content" />
-        <View
+         <View
           style={{
             position: "absolute",
             left: 0,
@@ -313,9 +253,10 @@ class Mapa extends Component {
           }}
         >
           <ActivityIndicator
+            style={{opacity : this.state.carregando ? 1.0 : 0.0}}
             size="large"
             color="#0000ff"
-            animating={this.state.carregando}
+            animating={true}
           />
         </View>
         <Switch
@@ -387,32 +328,18 @@ class Mapa extends Component {
           mapType={this.state.mapaHibrido ? "hybrid" : "standard"}
           onPress={event => this.definirPosicaoDoDispositivo(event)}
         >
-          {this.state.rotaParaTerminal.length > 0 && (
-            <Polyline
-              coordinates={this.state.rotaParaTerminal.map(coordenada => ({
-                longitude: coordenada[0],
-                latitude: coordenada[1]
-              }))}
-              strokeWidth={3}
-              strokeColor="#1a66ff"
-              fillColor="rgba(230,238,255,0.5)"
-            />
-          )}
-
-          {/*           {this.state.arrayRotasParaTerminais.length > 0 &&
+          {this.state.arrayRotasParaTerminais.length > 0 &&
             this.state.arrayRotasParaTerminais.map((rota, index) => (
               <Polyline
                 key={index}
                 coordinates={rota}
                 strokeWidth={3}
-                strokeColor="#1a66ff"
+                strokeColor={
+                  "#" + ((Math.random() * 0xffffff) << 0).toString(16)
+                }
                 fillColor="rgba(230,238,255,0.5)"
               />
-            ))} */}
-
-          {/*           {this.state.rotaParaTerminal.length > 0 && (
-
-          )} */}
+            ))}
 
           {this.state.coordenadasDispositivo && (
             <Marker
@@ -423,34 +350,31 @@ class Mapa extends Component {
             />
           )}
 
-          {this.state.terminalSelecionado != null ? (
-            <Circle
-              center={{
-                latitude: Number(
-                  this.state.posicaoTerminalSelecionado.latitude
-                ),
-                longitude: Number(
-                  this.state.posicaoTerminalSelecionado.longitude
-                )
-              }}
-              radius={30}
-              strokeWidth={1}
-              strokeColor="#1a66ff"
-              fillColor="rgba(230,238,255,0.5)"
-            />
-          ) : (
-            <View />
-          )}
+            {this.state.arrayTerminaisSelecionados.map((terminal, index) => (
+              <Circle
+                key={index}
+                center={{
+                  latitude: Number(terminal.latitude),
+                  longitude: Number(terminal.longitude)
+                }}
+                radius={30}
+                strokeWidth={1}
+                strokeColor="#1a66ff"
+                fillColor="rgba(230,238,255,0.5)"
+              />
+            ))}
 
           {this.state.terminais.map((terminal, index) => (
             <Marker
-              key={index + "_" + Date.now()}
+              key={index}
               coordinate={{
                 latitude: Number(terminal.latitude),
                 longitude: Number(terminal.longitude)
               }}
               image={
-                terminal.codigo == this.state.codigoTerminalSelecionado
+                this.state.arrayCodigoTerminaisSelecionados.includes(
+                  terminal.codigo
+                )
                   ? terminalSelecionado
                   : terminalIcone
               }
