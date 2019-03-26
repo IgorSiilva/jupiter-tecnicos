@@ -20,7 +20,7 @@ const cancelarAtendimento = (idordem) => {
 
 const finalizarAtendimento = async (dados, assinatura, usuario) => {
     db.transaction((tx) => {
-        tx.executeSql(`UPDATE OS SET emAndamento = ${0}, finalizada = ${1}, fimatendimento = "${dados.data}", latitudeTermino = "${dados.posicao.latitude}", longitudeTermino = "${dados.posicao.longitude}", status = ${dados.finalizacaoStatus}, historico = "${dados.historico}", assinatura = "${assinatura}", usuariofo = "${usuario}", descricao_status = "concluido", nomeDoAssinante = "${dados.nomeDoAssinante}", cpfDoAssinante = "${dados.cpfDoAssinante}", presencaDoTitular = ${Number(dados.presencaDoTitular)}, solucao = ${dados.solucao}, acessoRemoto = ${Number(dados.acessoRemotoHabilitado)} WHERE idordem = ${dados.ordem.idordem}`, [], (tx, results) => {
+        tx.executeSql(`UPDATE OS SET emAndamento = ${0}, finalizada = ${1}, fimatendimento = "${dados.data}", latitudeTermino = "${dados.posicao.latitude}", longitudeTermino = "${dados.posicao.longitude}", status = ${dados.finalizacaoStatus}, historico = "${dados.historico}", assinatura = "${assinatura}", usuariofo = "${usuario}", descricao_status = "concluido", nomeDoAssinante = "${dados.nomeDoAssinante}", cpfDoAssinante = "${dados.cpfDoAssinante}", presencaDoTitular = ${Number(dados.presencaDoTitular)}, solucao = ${dados.solucao}, acessoRemoto = ${Number(dados.acessoRemotoHabilitado)}, terminalSelecionado = "${dados.caixaAtendimentoSelecionada}" WHERE idordem = ${dados.ordem.idordem}`, [], (tx, results) => {
         });
     });
 }

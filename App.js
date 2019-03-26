@@ -37,7 +37,6 @@ export default class App extends Component {
   }
 
   onReceived(notificacao) {
-      console.log(notificacao);
     const novaOS = notificacao.payload.additionalData
     if(novaOS.status == "1") {
       removerOS(novaOS)
@@ -46,10 +45,10 @@ export default class App extends Component {
 
 
   onOpened(openResult) {
-    console.log('Message: ', openResult.notification.payload.body);
-    console.log('Data: ', openResult.notification.payload.additionalData);
-    console.log('isActive: ', openResult.notification.isAppInFocus);
-    console.log('openResult: ', openResult);
+    //console.log('Message: ', openResult.notification.payload.body);
+    //console.log('Data: ', openResult.notification.payload.additionalData);
+    //console.log('isActive: ', openResult.notification.isAppInFocus);
+    //console.log('openResult: ', openResult);
   }
 
   onIds(device) {

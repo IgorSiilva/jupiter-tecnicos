@@ -14,7 +14,13 @@ import {
   Icon
 } from "native-base";
 
-import { Alert, View, ScrollView, Image, TouchableHighlight } from "react-native";
+import {
+  Alert,
+  View,
+  ScrollView,
+  Image,
+  TouchableHighlight
+} from "react-native";
 
 import { status } from "./statusArr";
 import { styles } from "./atendimentoStyle";
@@ -22,6 +28,8 @@ import Orientation from "react-native-orientation";
 import { StatusBar } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ImagePicker from "react-native-image-picker";
+import { obterTerminaisV2 } from "../../config/api";
+
 var RNFS = require("react-native-fs");
 
 class FinalizarAtendimento extends Component {
@@ -38,7 +46,9 @@ class FinalizarAtendimento extends Component {
       acessoRemotoHabilitado: true,
       nomeDoAssinante: "",
       cpfDoAssinante: "",
-      imagens: []
+      imagens: [],
+      caixasAtendimento: [],
+      caixaAtendimentoSelecionada : ''
     };
 
     Orientation.lockToPortrait();
@@ -50,10 +60,32 @@ class FinalizarAtendimento extends Component {
     });
   }
 
+  onSelectCaixa(value) {
+      this.setState({
+          caixaAtendimentoSelecionada : value
+      })
+  }
+
+  componentDidMount() {
+    if (this.props.navigation.state.params.tipo_servico == 5) {
+      navigator.geolocation.getCurrentPosition(position => {
+        const { latitude, longitude } = position.coords;
+        obterTerminaisV2(latitude, longitude, 500).then(response => {
+          this.setState(
+            {
+              caixasAtendimento: response.terminais
+            },
+            () => console.log(this.state)
+          );
+        });
+      });
+    }
+  }
+
   finalizarAtendimento(props) {
     if (
       (this.state.pendente == false && this.state.concluido == false) ||
-      this.state.historico == ""
+      (this.state.historico == "" || this.state.caixaAtendimentoSelecionada == "")
     ) {
       Alert.alert("Erro", "Preencha os dados");
     } else {
@@ -64,7 +96,6 @@ class FinalizarAtendimento extends Component {
           },
           () => {
             let data = new Date();
-            //let formatedDate = data.toLocaleString();
             let formatedDate =
               data.toISOString().split("T")[0] +
               " " +
@@ -80,7 +111,8 @@ class FinalizarAtendimento extends Component {
               cpfDoAssinante: this.state.cpfDoAssinante,
               presencaDoTitular: this.state.presencaDoTitular,
               acessoRemotoHabilitado: this.state.acessoRemotoHabilitado,
-              imagens : this.state.imagens
+              imagens: this.state.imagens,
+              caixaAtendimentoSelecionada : this.state.caixaAtendimentoSelecionada
             };
 
             this.props.navigation.navigate("Assinatura", { dados });
@@ -112,10 +144,9 @@ class FinalizarAtendimento extends Component {
     });
   }
 
-
   removerImagem(index) {
-    this.state.imagens.splice(index, 1)
-    this.forceUpdate()
+    this.state.imagens.splice(index, 1);
+    this.forceUpdate();
   }
 
   render() {
@@ -283,6 +314,24 @@ class FinalizarAtendimento extends Component {
                     })}
               </Picker>
             </Item>
+        
+            {this.state.caixasAtendimento.length > 0 && (
+              <Item>
+                <Picker
+                  mode="dropdown"
+                  selectedValue={this.state.caixaAtendimentoSelecionada}
+                  onValueChange={this.onSelectCaixa.bind(this)}
+                >
+                  {this.state.caixasAtendimento.map(caixa => (
+                    <Picker.item
+                      key={caixa.id}
+                      label={caixa.codigo}
+                      value={caixa.codigo}
+                    />
+                  ))}
+                </Picker>
+              </Item>
+            )}
 
             {this.state.presencaDoTitular ? (
               <View />

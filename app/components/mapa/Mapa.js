@@ -315,9 +315,10 @@ class Mapa extends Component {
           }}
         >
           <ActivityIndicator
+            style={{opacity : this.state.carregando ? 1.0 : 0.0}}
             size="large"
             color="#0000ff"
-            animating={this.state.carregando}
+            animating={true}
           />
         </View>
         <Switch
@@ -400,22 +401,7 @@ class Mapa extends Component {
               fillColor="rgba(230,238,255,0.5)"
             />
           )}
-
-          {/*           {this.state.arrayRotasParaTerminais.length > 0 &&
-            this.state.arrayRotasParaTerminais.map((rota, index) => (
-              <Polyline
-                key={index}
-                coordinates={rota}
-                strokeWidth={3}
-                strokeColor="#1a66ff"
-                fillColor="rgba(230,238,255,0.5)"
-              />
-            ))} */}
-
-          {/*           {this.state.rotaParaTerminal.length > 0 && (
-
-          )} */}
-
+          
           {this.state.coordenadasDispositivo && (
             <Marker
               key={Date.now()}

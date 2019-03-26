@@ -117,12 +117,13 @@ class Ordens extends Component {
     });
   }
 
-  finalizarAtendimento(idordem, nome, servico, id) {
+  finalizarAtendimento(idordem, nome, servico, id, tipo_servico) {
     this.props.navigation.navigate("FinalizarAtendimento", {
       idordem: idordem,
       nome: nome,
       servico: servico,
-      idatendimento: id
+      idatendimento: id,
+      tipo_servico : tipo_servico
     });
   }
 
@@ -252,7 +253,8 @@ class Ordens extends Component {
                                 ordem.idordem,
                                 ordem.nomecliente,
                                 ordem.servico,
-                                ordem.id
+                                ordem.id,
+                                ordem.tipo_servico
                               );
                             }}
                           >
@@ -264,9 +266,6 @@ class Ordens extends Component {
                             style={styles.button}
                             onPress={() => {
                               this.cancelarAtendimento(ordem.idordem);
-                              /*                             cancelarAtendimento(
-                              ordem.idordem,
-                            ); */
                             }}
                           >
                             <Text>Cancelar Atendimento</Text>

@@ -113,7 +113,7 @@ class Assinatura extends Component {
                             `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
                             {
                               method: "POST",
-                              body: JSON.stringify({ ...OS, imagens })
+                              body: JSON.stringify({ ...OS[0], imagens })
                             }
                           ).then(response => {
                             removerOS(dados.ordem).then(() => {
