@@ -14,7 +14,8 @@ import { StackActions, NavigationActions } from "react-navigation";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 
 const terminalIcone = require("../../imagens/terminal.png");
-const dispositivoIcone = require("../../imagens/dispositivo.png");
+//const dispositivoIcone = require("../../imagens/dispositivo.png");
+const dispositivoIcone = require("../../imagens/man.png");
 const projetoIcone = require("../../imagens/pino.png");
 const terminalSelecionado = require("../../imagens/terminalselecionado.png");
 
@@ -48,6 +49,8 @@ class Mapa extends Component {
       arrayCodigoTerminaisSelecionados: [],
       arrayRotasParaTerminais: []
     };
+
+    console.log(this.props)
   }
 
   componentDidMount() {
@@ -130,130 +133,17 @@ class Mapa extends Component {
 
   tirarFotoDoMapa() {
     return this.mapa.takeSnapshot({
-      format: "png",
-      quality: 0.8,
+      //format: "png",
+      format: "jpg",
+      quality: 0.1,
       result: "base64"
     });
   }
-
-/*   async obterRota(latitude, longitude, LATITUDE, LONGITUDE) {
-    return obterCoordenadaMaisProxima({ latitude, longitude }).then(
-      response => {
-        const coordenadaTerminal = response.waypoints[0].location;
-        return obterCoordenadaMaisProxima(
-          this.state.coordenadasDispositivo
-        ).then(response => {
-          const coordenadaDispositivo = response.waypoints[0].location;
-          return obterRotaEntreDoisPontos(
-            {
-              latitude: coordenadaDispositivo[LATITUDE],
-              longitude: coordenadaDispositivo[LONGITUDE]
-            },
-            {
-              latitude: coordenadaTerminal[LATITUDE],
-              longitude: coordenadaTerminal[LONGITUDE]
-            }
-          ).then(response => {
-            let arrayCoordenadas = [];
-            const resultado = response.routes[0].geometry.coordinates.map(
-              async coordenada => {
-                arrayCoordenadas.push({
-                  longitude: coordenada[0],
-                  latitude: coordenada[1]
-                });
-              }
-            );
-
-            return Promise.all(resultado).then(response => {
-              return arrayCoordenadas;
-            });
-          });
-        });
-      }
-    );
-  } */
 
   tracarRotaParaTerminal(terminal, quantidadeTerminaisSelecionados) {
     const { latitude, longitude } = terminal;
     const LATITUDE = 1;
     const LONGITUDE = 0;
-
-/*     if (
-      quantidadeTerminaisSelecionados == 2 &&
-      this.state.posicaoProximoTerminalARemover == 0
-    ) {
-      this.state.arrayTerminaisSelecionados.splice(0, 1, terminal);
-      this.state.arrayPosicaoTerminaisSelecionados.splice(0, 1, {
-        latitude,
-        longitude
-      });
-      this.state.arrayCodigoTerminaisSelecionados.splice(0, 1, terminal.codigo);
-      this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
-        response => {
-          this.state.arrayRotasParaTerminais.splice(
-            0,
-            1,
-            response.routes[0].geometry.coordinates
-          );
-        }
-      );
-
-      this.setState({
-        posicaoProximoTerminalARemover: 1
-      });
-    } else if (
-      quantidadeTerminaisSelecionados == 2 &&
-      this.state.posicaoProximoTerminalARemover == 1
-    ) {
-      this.state.arrayTerminaisSelecionados.splice(1, 1, terminal);
-      this.state.arrayPosicaoTerminaisSelecionados.splice(1, 1, {
-        latitude,
-        longitude
-      });
-      this.state.arrayCodigoTerminaisSelecionados.splice(1, 1, terminal.codigo);
-      this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
-        response => {
-          this.state.arrayRotasParaTerminais.splice(
-            1,
-            1,
-            response.routes[0].geometry.coordinates
-          );
-        }
-      );
-      this.setState({
-        posicaoProximoTerminalARemover: 0
-      });
-    } else {
-      this.state.arrayTerminaisSelecionados.push(terminal);
-      this.state.arrayPosicaoTerminaisSelecionados.push({
-        latitude,
-        longitude
-      });
-      this.state.arrayCodigoTerminaisSelecionados.push(terminal.codigo); */
-
-    /*       this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
-        response => {
-          const resultado = response.routes[0].geometry.coordinates.map(
-            async coordenada => ({
-              longitude: coordenada[0],
-              latitude: coordenada[1]
-            })
-          );
-
-          Promise.all(resultado).then(response => {
-            this.state.arrayRotasParaTerminais.push(response);
-          });
-          this.forceUpdate();
-        }
-      ); */
-
-
-/*        this.obterRota(latitude, longitude, LATITUDE, LONGITUDE).then(
-        response => {
-          this.state.arrayRotasParaTerminais.push(response);
-          this.forceUpdate();
-        }
-      ); */
 
     this.setState(
       {
@@ -282,7 +172,6 @@ class Mapa extends Component {
               longitude: coordenadaTerminal[LONGITUDE]
             }
           ).then(response => {
-            //console.log(response)
             this.setState(
               {
                 rotaParaTerminal: response.routes[0].geometry.coordinates,
@@ -297,7 +186,6 @@ class Mapa extends Component {
       );
     });
   }
-//}
 
   render() {
     return (
@@ -347,23 +235,27 @@ class Mapa extends Component {
           <Button
             style={{ backgroundColor: "#F57C00" }}
             onPress={() => {
-              if (this.state.terminalSelecionado != undefined) {
+              if (this.state.terminalSelecionado != undefined) {                
                 this.tirarFotoDoMapa().then(foto => {
+                    //console.log(foto)
                   const dados = {
                     terminalSelecionado: this.state.terminalSelecionado,
                     fotoDoMapa: foto,
                     dadosOS: this.props.navigation.state.params
                   };
-                  const reset = StackActions.reset({
-                    index: 0,
-                    actions: [
-                      NavigationActions.navigate({
-                        routeName: "FinalizarViabilidade",
-                        params: { ...dados }
-                      })
-                    ]
-                  });
-                  this.props.navigation.dispatch(reset);
+                  if(this.props.navigation.state.params.tipo_servico == 5) {
+                    this.props.navigation.navigate("FinalizarAtendimento", {
+                        ...this.props.navigation.state.params,
+                        fotoDoMapa : foto,
+                        terminalSelecionado : this.state.terminalSelecionado
+                      });
+                  } else {
+                    this.props.navigation.navigate("FinalizarViabilidade", {
+                        dadosOS : this.props.navigation.state.params,
+                        fotoDoMapa : foto,
+                        terminalSelecionado : this.state.terminalSelecionado
+                      });
+                  }
                 });
               } else {
                 Alert.alert(
@@ -442,7 +334,7 @@ class Mapa extends Component {
                   ? terminalSelecionado
                   : terminalIcone
               }
-              anchor={{ x: 0.2, y: 0.3 }}
+              anchor={{ x: 0.4, y: 0.5 }}
               onPress={() =>
                 this.tracarRotaParaTerminal(
                   terminal,

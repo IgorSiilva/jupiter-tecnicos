@@ -52,6 +52,8 @@ class FinalizarAtendimento extends Component {
     };
 
     Orientation.lockToPortrait();
+
+    console.log(this.props)
   }
 
   onValueChange(value) {
@@ -68,24 +70,14 @@ class FinalizarAtendimento extends Component {
 
   componentDidMount() {
     if (this.props.navigation.state.params.tipo_servico == 5) {
-      navigator.geolocation.getCurrentPosition(position => {
-        const { latitude, longitude } = position.coords;
-        obterTerminaisV2(latitude, longitude, 500).then(response => {
-          this.setState(
-            {
-              caixasAtendimento: response.terminais
-            },
-            () => console.log(this.state)
-          );
-        });
-      });
+
     }
   }
 
   finalizarAtendimento(props) {
     if (
       (this.state.pendente == false && this.state.concluido == false) ||
-      (this.state.historico == "" || this.state.caixaAtendimentoSelecionada == "")
+      (this.state.historico == "")
     ) {
       Alert.alert("Erro", "Preencha os dados");
     } else {
@@ -112,7 +104,8 @@ class FinalizarAtendimento extends Component {
               presencaDoTitular: this.state.presencaDoTitular,
               acessoRemotoHabilitado: this.state.acessoRemotoHabilitado,
               imagens: this.state.imagens,
-              caixaAtendimentoSelecionada : this.state.caixaAtendimentoSelecionada
+              caixaAtendimentoSelecionada : props.navigation.state.params.terminalSelecionado == undefined ? "" : props.navigation.state.params.terminalSelecionado.codigo, 
+              fotoDoMapa : props.navigation.state.params.fotoDoMapa
             };
 
             this.props.navigation.navigate("Assinatura", { dados });
@@ -314,24 +307,7 @@ class FinalizarAtendimento extends Component {
                     })}
               </Picker>
             </Item>
-        
-            {this.state.caixasAtendimento.length > 0 && (
-              <Item>
-                <Picker
-                  mode="dropdown"
-                  selectedValue={this.state.caixaAtendimentoSelecionada}
-                  onValueChange={this.onSelectCaixa.bind(this)}
-                >
-                  {this.state.caixasAtendimento.map(caixa => (
-                    <Picker.item
-                      key={caixa.id}
-                      label={caixa.codigo}
-                      value={caixa.codigo}
-                    />
-                  ))}
-                </Picker>
-              </Item>
-            )}
+    
 
             {this.state.presencaDoTitular ? (
               <View />

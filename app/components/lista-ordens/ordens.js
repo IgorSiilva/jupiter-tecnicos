@@ -118,13 +118,24 @@ class Ordens extends Component {
   }
 
   finalizarAtendimento(idordem, nome, servico, id, tipo_servico) {
-    this.props.navigation.navigate("FinalizarAtendimento", {
-      idordem: idordem,
-      nome: nome,
-      servico: servico,
-      idatendimento: id,
-      tipo_servico : tipo_servico
-    });
+    if(tipo_servico	 == 5) { 
+        this.props.navigation.navigate("Mapa", {
+            idordem: idordem,
+            nome: nome,
+            servico: servico,
+            idatendimento: id,
+            tipo_servico : tipo_servico
+          });
+    } else {
+        this.props.navigation.navigate("FinalizarAtendimento", {
+            idordem: idordem,
+            nome: nome,
+            servico: servico,
+            idatendimento: id,
+            tipo_servico : tipo_servico
+          });
+    }
+
   }
 
   continuarAtendimentoViabilidade(idordem, nome, servico, idatendimento) {
