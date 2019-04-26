@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.facebook.react.ReactApplication;
+import com.agontuk.RNFusedLocation.RNFusedLocationPackage;
 import com.rnfs.RNFSPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.heanoria.library.reactnative.locationenabler.RNAndroidLocationEnablerPackage;
@@ -44,6 +45,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNFusedLocationPackage(),
             new RNFSPackage(),
             new ImagePickerPackage(),
             new RNAndroidLocationEnablerPackage(),

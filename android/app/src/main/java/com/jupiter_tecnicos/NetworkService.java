@@ -116,7 +116,7 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
     @Override
     public void onNetworkConnectionChanged(boolean isConnected) {
         String message = isConnected ? "Good! Connected to Internet" : "Sorry! Not connected to internet";
-        System.out.println(message);
+        //System.out.println(message);
 
         if(isConnected) {
 

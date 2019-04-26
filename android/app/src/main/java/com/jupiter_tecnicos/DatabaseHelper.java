@@ -20,7 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "  edificacao TEXT, status INT, descricao_status TEXT, contrato INT, servico TEXT, nomecliente, tipo_servico INT, rank INT," +
                 "  sistema TEXT, finalizada INT, endereco TEXT, latitudeInicio TEXT, longitudeInicio TEXT, latitudeTermino TEXT, longitudeTermino TEXT," +
                 "  fimatendimento TEXT, inicioatendimento TEXT, solucao INT, historico TEXT, assinatura BLOB, usuariofo TEXT, nomeDoAssinante TEXT," +
-                "  cpfDoAssinante TEXT, terminalSelecionado TEXT, distanciaTerminalSelecionado TEXT, drops INT, esticadores INT, fotoDoMapa BLOB, presencaDoTitular INT, acessoRemoto INT" +
+                "  cpfDoAssinante TEXT, terminalSelecionado TEXT, roteadorCliente TEXT, distanciaTerminalSelecionado TEXT, drops INT, esticadores INT, fotoDoMapa BLOB, presencaDoTitular INT, acessoRemoto INT" +
                 "  )");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS fotosViabilidade (foto BLOB, id INT, FOREIGN KEY(id) REFERENCES OS(id) ON DELETE CASCADE)");

@@ -9,12 +9,12 @@ import {
   obterCoordenadaMaisProxima,
   obterRotaEntreDoisPontos
 } from "../../config/osrm";
-import { StackActions, NavigationActions } from "react-navigation";
+import Geolocation from "react-native-geolocation-service";
 
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 
 const terminalIcone = require("../../imagens/terminal.png");
-//const dispositivoIcone = require("../../imagens/dispositivo.png");
+const terminalCheioIcone = require("../../imagens/terminalcheio.png");
 const dispositivoIcone = require("../../imagens/man.png");
 const projetoIcone = require("../../imagens/pino.png");
 const terminalSelecionado = require("../../imagens/terminalselecionado.png");
@@ -49,8 +49,6 @@ class Mapa extends Component {
       arrayCodigoTerminaisSelecionados: [],
       arrayRotasParaTerminais: []
     };
-
-    console.log(this.props)
   }
 
   componentDidMount() {
@@ -71,29 +69,51 @@ class Mapa extends Component {
     );
   }
 
+  retornarPosicaoOriginal() {
+    Geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+  
+          this.setState(
+            {
+              carregando: true,
+              coordenadasDispositivo: { latitude, longitude }
+            },
+            () => {
+              this.obterOuAtualizarTerminais();
+            }
+          );
+        },
+        error => {
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+      );
+  }
+
   atualizarTerminaisEDispositivo() {
     if (this.state.posicaoFoiEditada) {
       this.obterOuAtualizarTerminais();
       return;
     }
 
-    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-      interval: 10000,
-      fastInterval: 5000
-    }).then(data => {
-      navigator.geolocation.getCurrentPosition(position => {
+    Geolocation.getCurrentPosition(
+      position => {
         const { latitude, longitude } = position.coords;
 
         this.setState(
           {
+            carregando: true,
             coordenadasDispositivo: { latitude, longitude }
           },
           () => {
             this.obterOuAtualizarTerminais();
           }
         );
-      });
-    });
+      },
+      error => {
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+    );
   }
 
   obterOuAtualizarTerminais() {
@@ -107,9 +127,12 @@ class Mapa extends Component {
       longitude,
       distanciaMaximaDeTerminaisEmMetros
     ).then(({ terminais }) => {
-      this.setState({ terminais, carregando: false }, () =>
-        this.posicionarMapaMostrandoTodosTerminais()
-      );
+      this.setState({
+        terminais: terminais
+      });
+      this.setState({ terminais, carregando: false }, () => {
+        this.posicionarMapaMostrandoTodosTerminais();
+      });
     });
   }
 
@@ -151,13 +174,10 @@ class Mapa extends Component {
         terminalSelecionado: terminal,
         posicaoTerminalSelecionado: { latitude, longitude },
         codigoTerminalSelecionado: terminal.codigo
-      },
-      () => {
-        console.log(this.state);
       }
     );
 
-     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
+    obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
       const coordenadaTerminal = response.waypoints[0].location; // [longitude, latitude]
       obterCoordenadaMaisProxima(this.state.coordenadasDispositivo).then(
         response => {
@@ -176,9 +196,6 @@ class Mapa extends Component {
               {
                 rotaParaTerminal: response.routes[0].geometry.coordinates,
                 carregando: false
-              },
-              () => {
-                console.log(this.state);
               }
             );
           });
@@ -203,7 +220,9 @@ class Mapa extends Component {
           }}
         >
           <ActivityIndicator
-            style={{opacity : this.state.carregando ? 1.0 : 0.0}}
+            style={{
+              opacity: this.state.carregando ? 1.0 : 0.0
+            }}
             size="large"
             color="#0000ff"
             animating={true}
@@ -227,7 +246,7 @@ class Mapa extends Component {
 
           <Button
             style={{ backgroundColor: "#F57C00" }}
-            onPress={() => this.atualizarTerminaisEDispositivo()}
+            onPress={() => this.retornarPosicaoOriginal()}
           >
             <FontAwesome name="refresh" size={20} color="white" />
           </Button>
@@ -235,26 +254,25 @@ class Mapa extends Component {
           <Button
             style={{ backgroundColor: "#F57C00" }}
             onPress={() => {
-              if (this.state.terminalSelecionado != undefined) {                
+              if (this.state.terminalSelecionado != undefined) {
                 this.tirarFotoDoMapa().then(foto => {
-                    //console.log(foto)
                   const dados = {
                     terminalSelecionado: this.state.terminalSelecionado,
                     fotoDoMapa: foto,
                     dadosOS: this.props.navigation.state.params
                   };
-                  if(this.props.navigation.state.params.tipo_servico == 5) {
+                  if (this.props.navigation.state.params.tipo_servico == 5) {
                     this.props.navigation.navigate("FinalizarAtendimento", {
-                        ...this.props.navigation.state.params,
-                        fotoDoMapa : foto,
-                        terminalSelecionado : this.state.terminalSelecionado
-                      });
+                      ...this.props.navigation.state.params,
+                      fotoDoMapa: foto,
+                      terminalSelecionado: this.state.terminalSelecionado
+                    });
                   } else {
                     this.props.navigation.navigate("FinalizarViabilidade", {
-                        dadosOS : this.props.navigation.state.params,
-                        fotoDoMapa : foto,
-                        terminalSelecionado : this.state.terminalSelecionado
-                      });
+                      dadosOS: this.props.navigation.state.params,
+                      fotoDoMapa: foto,
+                      terminalSelecionado: this.state.terminalSelecionado
+                    });
                   }
                 });
               } else {
@@ -280,7 +298,11 @@ class Mapa extends Component {
           }}
           loadingEnabled={true}
           mapType={this.state.mapaHibrido ? "hybrid" : "standard"}
-          onPress={event => this.definirPosicaoDoDispositivo(event)}
+          onPress={event =>
+            this.state.carregando
+              ? null
+              : this.definirPosicaoDoDispositivo(event)
+          }
         >
           {this.state.rotaParaTerminal.length > 0 && (
             <Polyline
@@ -293,7 +315,7 @@ class Mapa extends Component {
               fillColor="rgba(230,238,255,0.5)"
             />
           )}
-          
+
           {this.state.coordenadasDispositivo && (
             <Marker
               key={Date.now()}
@@ -324,22 +346,23 @@ class Mapa extends Component {
 
           {this.state.terminais.map((terminal, index) => (
             <Marker
+              disabled
               key={index + "_" + Date.now()}
               coordinate={{
                 latitude: Number(terminal.latitude),
                 longitude: Number(terminal.longitude)
               }}
-              image={
-                terminal.codigo == this.state.codigoTerminalSelecionado
-                  ? terminalSelecionado
-                  : terminalIcone
+              image = {
+                  terminal.caixa_cheia == "1" ? terminalCheioIcone : (
+                      terminal.codigo == this.state.codigoTerminalSelecionado ? terminalSelecionado : terminalIcone
+                  )
               }
               anchor={{ x: 0.4, y: 0.5 }}
               onPress={() =>
-                this.tracarRotaParaTerminal(
-                  terminal,
-                  this.state.arrayTerminaisSelecionados.length
+                terminal.caixa_cheia == "1" ? Alert.alert("Terminal de Atendimento cheio", "O terminal de atendimento já está cheio, por favor selecione outro") : (
+                    this.state.carregando ? null : this.tracarRotaParaTerminal(terminal, this.state.arrayTerminaisSelecionados.length)
                 )
+
               }
             >
               <View

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  StyleSheet,
   Image,
   ScrollView,
   View,
@@ -19,7 +18,10 @@ import {
   Input,
   Button,
   Text,
-  Icon
+  Icon,
+  ListItem,
+  CheckBox,
+  Body
 } from "native-base";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ImagePicker from "react-native-image-picker";
@@ -28,12 +30,10 @@ import {
   finalizarViabilidade,
   removerOS,
   removerFotos,
-  buscarOrdemERemover,
   buscarOSEspecifica,
   buscarImagemOS
 } from "../../helpers/databaseHelper";
 import { apiUrl } from "../../config/api";
-const SQLite = require("react-native-sqlite-storage");
 import { StackActions, NavigationActions } from "react-navigation";
 var RNFS = require("react-native-fs");
 
@@ -46,11 +46,12 @@ class FinalizarViabilidade extends Component {
       imagens: [],
       posicao: "",
       carregando: false,
-      historico: ""
+      historico: "",
+      roteadorCliente: false,
     };
     this.removerImagem = this.removerImagem.bind(this);
 
-    console.log(props)
+    //console.log(props)
   }
 
   componentDidMount() {}
@@ -92,9 +93,9 @@ class FinalizarViabilidade extends Component {
     });
   }
 
-  async verificarConexãoInternet() {
+  async verificarConexaoInternet() {
     return NetInfo.getConnectionInfo().then(status => {
-      if (status.type == "wifi" || status.type == "cellular") {
+      if (status.type == "wifi" /* || status.type == "cellular" */) {
         return true;
       } else {
         return false;
@@ -135,7 +136,7 @@ class FinalizarViabilidade extends Component {
             ordem: this.props.navigation.state.params.dadosOS,
             data: formatedDate,
             viabilidade: { ...this.state },
-            terminalSelecionado: this.props.navigation.state.params        .terminalSelecionado,
+            terminalSelecionado: this.props.navigation.state.params.terminalSelecionado,
             imagemMapa: this.props.navigation.state.params.fotoDoMapa,
             posicao: this.state.posicao,
             historico: this.state.historico
@@ -147,7 +148,7 @@ class FinalizarViabilidade extends Component {
                 () => {
                   buscarOSEspecifica(dados.ordem.idordem).then(OS => {
                     buscarImagemOS(dados.ordem.idatendimento).then(imagens => {
-                      this.verificarConexãoInternet().then(conexao => {
+                      this.verificarConexaoInternet().then(conexao => {
                         if (conexao) {
                           try {
                             fetch(
@@ -251,6 +252,37 @@ class FinalizarViabilidade extends Component {
                 }}
               />
             </Item>
+
+            <Item
+              style={{marginVertical : 35}}
+              onPress={() => {
+                this.setState({
+                  roteadorCliente: !this.state.roteadorCliente
+                });
+              }}
+            >
+              <CheckBox
+                style={{marginVertical : 10}}
+                color="#1B8332"
+                checked={this.state.roteadorCliente}
+                onPress={() => {
+                  this.setState({
+                    roteadorCliente: !this.state.roteadorCliente
+                  });
+                }}
+              />
+              <Body>
+                <Text
+                  onPress={() => {
+                    this.setState({
+                      roteadorCliente: !this.state.roteadorCliente
+                    });
+                  }}
+                >
+                  Roteador do Cliente
+                </Text>
+              </Body>
+            </Item>
           </Form>
           <Button
             full
@@ -313,22 +345,5 @@ class FinalizarViabilidade extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  /*   content: {
-      backgroundColor: colors.white
-    },
-    foto: {
-      backgroundColor: 'green',
-      marginTop: 16
-    },
-    submit: {
-      backgroundColor: colors.deepOrangeA200,
-      marginTop: 16
-    },
-    picker: {
-      marginTop: 16
-    } */
-});
 
 export { FinalizarViabilidade };

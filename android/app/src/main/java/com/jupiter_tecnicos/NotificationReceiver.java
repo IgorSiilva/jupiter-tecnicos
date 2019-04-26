@@ -26,11 +26,11 @@ public class NotificationReceiver implements OneSignal.NotificationReceivedHandl
     public void notificationReceived(OSNotification notification) {
 
         JSONObject dadosOS = notification.payload.additionalData;
-        System.out.println(notification.payload.additionalData);
+        //System.out.println(notification.payload.additionalData);
 
         try {
             if(!isAppOnForeground(context)) {
-                if(dadosOS.getInt("status") == 1) {
+                if(dadosOS.getString("acao").equals("remover")) {
 
                     DatabaseHelper mDbHelper = new DatabaseHelper(context);
                     SQLiteDatabase db = mDbHelper.getWritableDatabase();

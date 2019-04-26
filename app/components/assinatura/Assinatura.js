@@ -88,8 +88,8 @@ class Assinatura extends Component {
         salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
           NetInfo.getConnectionInfo().then(statusNetwork => {
             if (
-              statusNetwork.type == "wifi" ||
-              statusNetwork.type == "cellular"
+              statusNetwork.type == "wifi" //||
+              //statusNetwork.type == "cellular"
             ) {
               const db = SQLite.openDatabase({
                 name: "OS",

@@ -38,7 +38,7 @@ export default class App extends Component {
 
   onReceived(notificacao) {
     const novaOS = notificacao.payload.additionalData
-    if(novaOS.status == "1") {
+    if(novaOS.acao == "remover") {
       removerOS(novaOS)
     }    
   }

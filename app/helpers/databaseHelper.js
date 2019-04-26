@@ -26,9 +26,9 @@ const finalizarAtendimento = async (dados, assinatura, usuario) => {
 }
 
 const finalizarViabilidade = async(dados, usuario) => {
-    console.log(dados)
+    //console.log(dados)
     db.transaction((tx) => {
-        tx.executeSql(`UPDATE OS SET emAndamento = ${0}, finalizada = ${1}, fimatendimento = "${dados.data}", latitudeTermino = "${dados.posicao.coords.latitude}", longitudeTermino = "${dados.posicao.coords.longitude}", usuariofo = "${usuario}", descricao_status = "concluido", terminalSelecionado = "${dados.terminalSelecionado.codigo}", distanciaTerminalSelecionado = "${dados.terminalSelecionado.distancia}", drops = ${dados.viabilidade.drops}, esticadores = ${dados.viabilidade.esticadores}, fotoDoMapa = "${dados.imagemMapa}", historico = "${dados.historico}" WHERE idordem = ${dados.ordem.idordem}`, [], (tx, results) => {
+        tx.executeSql(`UPDATE OS SET emAndamento = ${0}, finalizada = ${1}, fimatendimento = "${dados.data}", latitudeTermino = "${dados.posicao.coords.latitude}", longitudeTermino = "${dados.posicao.coords.longitude}", usuariofo = "${usuario}", descricao_status = "concluido", terminalSelecionado = "${dados.terminalSelecionado.codigo}", distanciaTerminalSelecionado = "${dados.terminalSelecionado.distancia}", drops = ${dados.viabilidade.drops}, esticadores = ${dados.viabilidade.esticadores}, fotoDoMapa = "${dados.imagemMapa}", historico = "${dados.historico}", roteadorCliente = "${dados.viabilidade.roteadorCliente}" WHERE idordem = ${dados.ordem.idordem}`, [], (tx, results) => {
             //console.log(results)
         });
     });

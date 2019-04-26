@@ -79,14 +79,16 @@ class Ordens extends Component {
   }
 
   onReceived(notificacao) {
+    console.log(notificacao.payload.additionalData)
     const novaOS = notificacao.payload.additionalData;
-    if (novaOS.status == "1") {
+    if (novaOS.acao == "remover") {
+    /* if (novaOS.status == "1") { */
       removerOS(novaOS).then(() => {
         this.buscarOrdensNoDb();
       });
     } else {
       inserirOS(notificacao.payload.additionalData).then(() => {
-        console.log(notificacao.payload);
+        //console.log(notificacao.payload);
         this.buscarOrdensNoDb();
       });
     }
@@ -96,7 +98,7 @@ class Ordens extends Component {
     const db = SQLite.openDatabase({ name: "OS", createFromLocation: "1" });
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM OS", [], (tx, results) => {
-        console.log(results.rows.raw());
+        //console.log(results.rows.raw());
         this.setState(
           {
             ordens: results.rows.raw()
@@ -108,7 +110,7 @@ class Ordens extends Component {
   }
 
   iniciarAtendimento(idordem, nome, servico, idatendimento, tipo_servico) {
-    this.props.navigation.navigate("InicioAtendimento", {
+     this.props.navigation.navigate("InicioAtendimento", {
       idordem: idordem,
       nome: nome,
       servico: servico,
