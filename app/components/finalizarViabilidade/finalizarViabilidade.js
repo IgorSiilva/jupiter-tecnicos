@@ -19,7 +19,6 @@ import {
   Button,
   Text,
   Icon,
-  ListItem,
   CheckBox,
   Body
 } from "native-base";
@@ -35,6 +34,8 @@ import {
 } from "../../helpers/databaseHelper";
 import { apiUrl } from "../../config/api";
 import { StackActions, NavigationActions } from "react-navigation";
+import Geolocation from "react-native-geolocation-service";
+
 var RNFS = require("react-native-fs");
 
 class FinalizarViabilidade extends Component {
@@ -85,7 +86,7 @@ class FinalizarViabilidade extends Component {
           },
           () => {
             return RNFS.unlink(response.path).then(() => {
-              console.log("FILE DELETED");
+              //console.log("FILE DELETED");
             });
           }
         );
@@ -122,78 +123,71 @@ class FinalizarViabilidade extends Component {
     }
 
     let data = new Date();
-    let formatedDate =
-      data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
+    let formatedDate = data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
 
-    navigator.geolocation.getCurrentPosition(position => {
-      this.setState(
-        {
-          posicao: position,
-          carregando: true
-        },
-        () => {
-          const dados = {
-            ordem: this.props.navigation.state.params.dadosOS,
-            data: formatedDate,
-            viabilidade: { ...this.state },
-            terminalSelecionado: this.props.navigation.state.params.terminalSelecionado,
-            imagemMapa: this.props.navigation.state.params.fotoDoMapa,
-            posicao: this.state.posicao,
-            historico: this.state.historico
-          };
-
-          AsyncStorage.getItem("usuario").then(usuario => {
-            finalizarViabilidade(dados, usuario).then(() => {
-              salvarFoto(dados.ordem.idatendimento, this.state.imagens).then(
-                () => {
-                  buscarOSEspecifica(dados.ordem.idordem).then(OS => {
-                    buscarImagemOS(dados.ordem.idatendimento).then(imagens => {
-                      this.verificarConexaoInternet().then(conexao => {
-                        if (conexao) {
-                          try {
-                            fetch(
-                              `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
-                              {
-                                method: "POST",
-                                body: JSON.stringify({ ...OS[0], imagens })
+    Geolocation.getCurrentPosition(position => {
+        this.setState(
+            {
+              posicao: position,
+              carregando: true
+            },
+            () => {
+              const dados = {
+                ordem: this.props.navigation.state.params.dadosOS,
+                data: formatedDate,
+                viabilidade: { ...this.state },
+                terminalSelecionado: this.props.navigation.state.params.terminalSelecionado,
+                imagemMapa: this.props.navigation.state.params.fotoDoMapa,
+                posicao: this.state.posicao,
+                historico: this.state.historico
+              };
+    
+              AsyncStorage.getItem("usuario").then(usuario => {
+                finalizarViabilidade(dados, usuario).then(() => {
+                  salvarFoto(dados.ordem.idatendimento, this.state.imagens).then(
+                    () => {
+                      buscarOSEspecifica(dados.ordem.idordem).then(OS => {
+                        buscarImagemOS(dados.ordem.idatendimento).then(imagens => {
+                          this.verificarConexaoInternet().then(conexao => {
+                            if (conexao) {
+                              try {
+                                fetch(
+                                  `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
+                                  {
+                                    method: "POST",
+                                    body: JSON.stringify({ ...OS[0], imagens })
+                                  }
+                                ).then(response => {
+                                    console.log(response)
+                                  removerOS(dados.ordem).then(() => {
+                                    removerFotos(dados.ordem.idatendimento).then(() => {
+                                        this.setState({ carregando: false }, () => { this.retornarParaTelaPrincipal() });
+                                    })
+                                  });
+                                });
+                              } catch (error) {
+                                this.setState({ carregando : false }, () => { this.retornarParaTelaPrincipal() })                           
                               }
-                            ).then(response => {
-                              removerOS(dados.ordem).then(() => {
-                                removerFotos(dados.ordem.idatendimento).then(() => {
-                                    this.setState({
-                                        carregando: false
-                                    }, () => {
-                                        this.retornarParaTelaPrincipal();
-                                    });
-
-                                })
-                              });
-                            });
-                          } catch (error) {
-
-                            this.setState({
-                                carregando : false
-                            }, () => {
-                                this.retornarParaTelaPrincipal();
-                            })                           
-                          }
-                        } else {
-                            this.setState({
-                                carregando : false
-                            }, () => {
-                                this.retornarParaTelaPrincipal();
-                            })
-                        }
+                            } else {
+                                this.setState({ carregando : false }, () => { this.retornarParaTelaPrincipal() })
+                            }
+                          });
+                        });
                       });
-                    });
-                  });
-                }
-              );
-            });
-          });
-        }
-      );
-    });
+                    }
+                  );
+                });
+              });
+            }
+          );
+    },
+    error => {},
+    {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000})
+
+
+/*     navigator.geolocation.getCurrentPosition(position => {
+
+    }); */
   }
 
   removerImagem(index) {

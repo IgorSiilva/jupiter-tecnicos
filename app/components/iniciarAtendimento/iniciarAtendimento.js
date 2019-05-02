@@ -34,7 +34,7 @@ class InicioAtendimento extends Component {
     if (confirmacao == "Sim") {
       Geolocation.getCurrentPosition(
         position => {
-          console.log(position);
+          //console.log(position);
           //navigator.geolocation.getCurrentPosition(position => {
           this.setState(
             {
@@ -83,7 +83,7 @@ class InicioAtendimento extends Component {
           );
         },
          error => {
-          console.log(error);
+          //console.log(error);
         },
         {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000}
       );

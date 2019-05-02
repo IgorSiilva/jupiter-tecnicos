@@ -29,6 +29,7 @@ import { StatusBar } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ImagePicker from "react-native-image-picker";
 import { obterTerminaisV2 } from "../../config/api";
+import Geolocation from "react-native-geolocation-service";
 
 var RNFS = require("react-native-fs");
 
@@ -53,7 +54,7 @@ class FinalizarAtendimento extends Component {
 
     Orientation.lockToPortrait();
 
-    console.log(this.props)
+    //console.log(this.props)
   }
 
   onValueChange(value) {
@@ -81,17 +82,15 @@ class FinalizarAtendimento extends Component {
     ) {
       Alert.alert("Erro", "Preencha os dados");
     } else {
-      navigator.geolocation.getCurrentPosition(position => {
+        Geolocation.getCurrentPosition(position => {
+      /* navigator.geolocation.getCurrentPosition(position => { */
         this.setState(
           {
             posicao: position.coords
           },
           () => {
             let data = new Date();
-            let formatedDate =
-              data.toISOString().split("T")[0] +
-              " " +
-              data.toLocaleTimeString();
+            let formatedDate = data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
             const dados = {
               ordem: props.navigation.state.params,
               posicao: this.state.posicao,
@@ -107,7 +106,6 @@ class FinalizarAtendimento extends Component {
               caixaAtendimentoSelecionada : props.navigation.state.params.terminalSelecionado == undefined ? "" : props.navigation.state.params.terminalSelecionado.codigo, 
               fotoDoMapa : props.navigation.state.params.fotoDoMapa
             };
-
             this.props.navigation.navigate("Assinatura", { dados });
           }
         );
@@ -129,7 +127,7 @@ class FinalizarAtendimento extends Component {
           },
           () => {
             return RNFS.unlink(response.path).then(() => {
-              console.log("FILE DELETED");
+              //console.log("FILE DELETED");
             });
           }
         );
@@ -146,7 +144,6 @@ class FinalizarAtendimento extends Component {
     return (
       <Container>
         <StatusBar backgroundColor="#F78154" barStyle="light-content" />
-
         <Content>
           <Form style={{ width: "95%" }}>
             <Item floatingLabel style={styles.textarea}>
