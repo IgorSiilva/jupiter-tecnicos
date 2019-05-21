@@ -36,11 +36,13 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class NetworkService extends JobService implements NetworkChangeReceiver.ConnectivityReceiverListener {
 
     private static final String TAG = NetworkService.class.getSimpleName();
+    public static boolean postResult = false;
 
     private NetworkChangeReceiver mConnectivityReceiver;
 
@@ -71,9 +73,14 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
         return true;
     }
 
-
-    public static void doPost(JSONObject jsonParams) {
+    public static void doPost(JSONObject jsonParams, String id, String fotos, SQLiteDatabase db) {
         final JSONObject jsonParam = jsonParams;
+        final String idOS = id;
+        final String idFotos = fotos;
+        final SQLiteDatabase database = db;
+
+
+        Log.d("TESTE2", idOS);
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -90,8 +97,6 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                     Log.i("JSON", jsonParam.toString());
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
-
-
                     conn.getOutputStream().write(jsonParam.toString().getBytes("UTF-8"));
 
                     os.flush();
@@ -100,7 +105,18 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                     Log.i("STATUS", String.valueOf(conn.getResponseCode()));
                     Log.i("MSG" , conn.getResponseMessage());
 
+
+                    if(String.valueOf(conn.getResponseCode()).equals("200")) {
+                        System.out.println("DELETANDO");
+                        database.delete("OS", "id=?", new String[] {idOS});
+                        database.delete("fotosViabilidade", "id=?", new String[] {idFotos});
+                    } else {
+                    }
+
                     conn.disconnect();
+
+
+
                 } catch (Exception e) {
                     System.out.println(e);
                     e.printStackTrace();
@@ -116,7 +132,6 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
     @Override
     public void onNetworkConnectionChanged(boolean isConnected) {
         String message = isConnected ? "Good! Connected to Internet" : "Sorry! Not connected to internet";
-        //System.out.println(message);
 
         if(isConnected) {
 
@@ -130,6 +145,7 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
             String having = null;
             String orderBy = null;
             String limit = null;
+            String idFotos = "";
 
             Cursor cursor = db.query("OS", columns, selection, selectionArgs, groupBy, having, orderBy, limit);
 
@@ -138,13 +154,15 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                 JSONObject jsonFotos = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
 
+
                 Cursor cursorFotos = db.query("fotosViabilidade", columns, "id =?", new String[]{cursor.getString(cursor.getColumnIndex("id"))}, groupBy, having, orderBy, limit);
-                //db.close();
                 if(cursorFotos.moveToFirst()) {
                     while (!cursorFotos.isAfterLast()) {
                         try {
                             jsonFotos.put("foto",cursorFotos.getString(cursorFotos.getColumnIndex("foto")));
+
                             jsonFotos.put("id",cursorFotos.getString(cursorFotos.getColumnIndex("id")));
+                            idFotos = cursorFotos.getString(cursorFotos.getColumnIndex("id"));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -190,15 +208,14 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                         jsonParam.put("terminalSelecionado", cursor.getString(cursor.getColumnIndex("terminalSelecionado")));
                         jsonParam.put("distanciaTerminalSelecionado", cursor.getString(cursor.getColumnIndex("distanciaTerminalSelecionado")));
 
+                        String id = (cursor.getString(cursor.getColumnIndex("id")));
+
+                        doPost(jsonParam, id, idFotos, mDbHelper.getWritableDatabase());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    doPost(jsonParam);
 
-                    SQLiteDatabase writableDB = mDbHelper.getWritableDatabase();
-                    writableDB.delete("OS", "id=?", new String[] {cursor.getString(cursor.getColumnIndex("id"))});
-                    writableDB.delete("fotosViabilidade", "id=?", new String[] {cursor.getString(cursor.getColumnIndex("id"))});
-                    //writableDB.close();
+
 
                     cursor.moveToNext();
                 }
