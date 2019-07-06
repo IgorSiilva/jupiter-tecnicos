@@ -116,7 +116,6 @@ def enableProguardInReleaseBuilds = true
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.jupiter_tecnicos"
@@ -137,7 +136,8 @@ android {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
             universalApk false  // If true, also generate a universal APK
-            include "armeabi-v7a", "x86"
+            //include "armeabi-v7a", "x86"
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
         signingConfigs {
@@ -188,14 +188,14 @@ dependencies {
 
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    //implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
-    //compile 'com.google.android.gms:play-services-base:+'
-    compile 'com.google.android.gms:play-services-location:+'
-    compile 'com.google.android.gms:play-services-maps:+'
-    implementation 'com.google.firebase:firebase-core:+'
-    implementation 'com.firebaseui:firebase-ui-auth:+'
+    compile 'com.google.android.gms:play-services-base:11.8.0'
+    compile "com.google.android.gms:play-services-location: 11.8.0"
+    compile "com.google.android.gms:play-services-maps: 11.8.0"
+    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'com.firebaseui:firebase-ui-auth:4.2.1'
     compile project(':react-native-sqlite-storage')
     implementation 'com.onesignal:OneSignal:[3.9.1, 3.99.99]'
     implementation 'com.google.firebase:firebase-messaging:18.0.0'
@@ -203,10 +203,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:17.0.0'
 
 
+
     compile(project(':react-native-geolocation-service')) {
         exclude group: 'com.google.android.gms', module: 'play-services-location'
     }
-    compile 'com.google.android.gms:play-services-location: 11.8.0'
+    //compile 'com.google.android.gms:play-services-location: 11.8.0'
 
 
 }
@@ -223,7 +224,7 @@ configurations.all {
         def requested = details.requested
         if (requested.group == 'com.android.support') {
             if (!requested.name.startsWith("multidex")) {
-                details.useVersion '26.1.0'
+                details.useVersion '27.1.0'
             }
         }
     }
