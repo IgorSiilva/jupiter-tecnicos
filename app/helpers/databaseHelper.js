@@ -11,7 +11,6 @@ const iniciarAtendimento = (dados) => {
 
 
 const cancelarAtendimento = (idordem) => {
-    console.log(idordem)
     db.transaction((tx) => {
         tx.executeSql(`UPDATE OS SET emAndamento = ${0}, inicioatendimento = "" WHERE idordem = ${idordem}`, [], (tx, results) => {
         });

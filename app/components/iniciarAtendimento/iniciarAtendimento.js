@@ -99,7 +99,6 @@ class InicioAtendimento extends Component {
         title: "Realmente deseja iniciar?"
       },
       buttonIndex => {
-        console.log(options[buttonIndex]);
         this.confirmacaoAtendimento(props, options[buttonIndex]);
       }
     );

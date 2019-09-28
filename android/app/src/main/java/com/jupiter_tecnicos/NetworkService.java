@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -93,8 +94,6 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
 
-
-                    Log.i("JSON", jsonParam.toString());
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
                     conn.getOutputStream().write(jsonParam.toString().getBytes("UTF-8"));
@@ -102,14 +101,30 @@ public class NetworkService extends JobService implements NetworkChangeReceiver.
                     os.flush();
                     os.close();
 
-                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
-                    Log.i("MSG" , conn.getResponseMessage());
-
-
                     if(String.valueOf(conn.getResponseCode()).equals("200")) {
-                        System.out.println("DELETANDO");
-                        database.delete("OS", "id=?", new String[] {idOS});
-                        database.delete("fotosViabilidade", "id=?", new String[] {idFotos});
+                        InputStream inputStream;
+
+                        inputStream = conn.getInputStream();
+
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(
+                                        inputStream));
+
+                        StringBuilder response = new StringBuilder();
+                        String currentLine;
+
+                        while ((currentLine = in.readLine()) != null)
+                            response.append(currentLine);
+
+                        in.close();
+
+                        JSONObject obj = new JSONObject(response.toString());
+
+                        if(obj.getString("success").equals("1")) {
+                            database.delete("OS", "id=?", new String[] {idOS});
+                            database.delete("fotosViabilidade", "id=?", new String[] {idFotos});
+                        }
+
                     } else {
                     }
 

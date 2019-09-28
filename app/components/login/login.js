@@ -41,8 +41,8 @@ class LoginScreen extends Component {
   login() {
     //OneSignal.configure()
     //habilita o network no debugger
-    GLOBAL.XMLHttpRequest =
-      GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
+    // GLOBAL.XMLHttpRequest =
+    //   GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
 
     if (this.state.user == "" || this.state.password == "") {
       Alert.alert("Error", "Preencha os campos de login");

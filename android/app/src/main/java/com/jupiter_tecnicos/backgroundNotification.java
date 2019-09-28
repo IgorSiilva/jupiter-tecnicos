@@ -12,6 +12,7 @@ import com.onesignal.OSNotificationReceivedResult;
 import com.onesignal.OSNotificationDisplayedResult;
 import com.onesignal.OneSignal;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -21,22 +22,17 @@ public class backgroundNotification extends NotificationExtenderService {
 
     @Override
     protected boolean onNotificationProcessing(OSNotificationReceivedResult receivedResult) {
-        OverrideSettings overrideSettings = new OverrideSettings();
-        overrideSettings.extender = new NotificationCompat.Extender() {
-            @Override
-            public NotificationCompat.Builder extend(NotificationCompat.Builder builder) {
-                // Sets the background notification color to Green on Android 5.0+ devices.
-                return builder.setColor(new BigInteger("FF00FF00", 16).intValue());
+        if(receivedResult.payload.additionalData == null) {
+            return true;
+        }
+        try {
+            System.out.println(receivedResult.payload.additionalData.getString("acao"));
+            if(receivedResult.payload.additionalData.getString("acao").equals("remover")) {
+                return true;
             }
-        };
-
-        OSNotificationDisplayedResult displayedResult = displayNotification(overrideSettings);
-
-
-        Log.d("OneSignalExample2", "Notification displayed with id: " + displayedResult.androidNotificationId);
-
-
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return false;
-        //return true;
     }
 }

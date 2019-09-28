@@ -38,8 +38,18 @@ allprojects {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
+    }
 
-
+    subprojects {
+        afterEvaluate {
+            project ->
+                if (project.hasProperty("android")) {
+                    android {
+                        compileSdkVersion = 27
+                        buildToolsVersion = "27.0.3"
+                    }
+                }
+        }
     }
 }
 

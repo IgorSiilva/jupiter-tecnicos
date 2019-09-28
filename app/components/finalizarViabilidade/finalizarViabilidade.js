@@ -48,7 +48,7 @@ class FinalizarViabilidade extends Component {
       posicao: "",
       carregando: false,
       historico: "",
-      roteadorCliente: false,
+      roteadorCliente: false
     };
     this.removerImagem = this.removerImagem.bind(this);
 
@@ -79,6 +79,7 @@ class FinalizarViabilidade extends Component {
       quality: 0.5
     };
     ImagePicker.launchCamera(options, response => {
+        console.log(response)
       if (response.didCancel != true) {
         this.setState(
           {
@@ -123,31 +124,35 @@ class FinalizarViabilidade extends Component {
     }
 
     let data = new Date();
-    let formatedDate = data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
+    let formatedDate =
+      data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
 
-    Geolocation.getCurrentPosition(position => {
+    Geolocation.getCurrentPosition(
+      position => {
         this.setState(
-            {
-              posicao: position,
-              carregando: true
-            },
-            () => {
-              const dados = {
-                ordem: this.props.navigation.state.params.dadosOS,
-                data: formatedDate,
-                viabilidade: { ...this.state },
-                terminalSelecionado: this.props.navigation.state.params.terminalSelecionado,
-                imagemMapa: this.props.navigation.state.params.fotoDoMapa,
-                posicao: this.state.posicao,
-                historico: this.state.historico
-              };
-    
-              AsyncStorage.getItem("usuario").then(usuario => {
-                finalizarViabilidade(dados, usuario).then(() => {
-                  salvarFoto(dados.ordem.idatendimento, this.state.imagens).then(
-                    () => {
-                      buscarOSEspecifica(dados.ordem.idordem).then(OS => {
-                        buscarImagemOS(dados.ordem.idatendimento).then(imagens => {
+          {
+            posicao: position,
+            carregando: true
+          },
+          () => {
+            const dados = {
+              ordem: this.props.navigation.state.params.dadosOS,
+              data: formatedDate,
+              viabilidade: { ...this.state },
+              terminalSelecionado: this.props.navigation.state.params
+                .terminalSelecionado,
+              imagemMapa: this.props.navigation.state.params.fotoDoMapa,
+              posicao: this.state.posicao,
+              historico: this.state.historico
+            };
+
+            AsyncStorage.getItem("usuario").then(usuario => {
+              finalizarViabilidade(dados, usuario).then(() => {
+                salvarFoto(dados.ordem.idatendimento, this.state.imagens).then(
+                  () => {
+                    buscarOSEspecifica(dados.ordem.idordem).then(OS => {
+                      buscarImagemOS(dados.ordem.idatendimento).then(
+                        imagens => {
                           this.verificarConexaoInternet().then(conexao => {
                             if (conexao) {
                               try {
@@ -158,36 +163,49 @@ class FinalizarViabilidade extends Component {
                                     body: JSON.stringify({ ...OS[0], imagens })
                                   }
                                 ).then(response => {
-                                    console.log(response)
-                                  removerOS(dados.ordem).then(() => {
-                                    removerFotos(dados.ordem.idatendimento).then(() => {
-                                        this.setState({ carregando: false }, () => { this.retornarParaTelaPrincipal() });
+                                    response.json().then((data) => {
+                                        if (data.success == "1") {
+                                            removerOS(dados.ordem).then(() => {
+                                              removerFotos(
+                                                dados.ordem.idatendimento
+                                              ).then(() => {
+                                                this.setState(
+                                                  { carregando: false },
+                                                  () => {
+                                                    this.retornarParaTelaPrincipal();
+                                                  }
+                                                );
+                                              });
+                                            });
+                                          } else {
+                                            this.retornarParaTelaPrincipal();
+                                          }
                                     })
-                                  });
                                 });
                               } catch (error) {
-                                this.setState({ carregando : false }, () => { this.retornarParaTelaPrincipal() })                           
+                                this.setState({ carregando: false }, () => {
+                                  this.retornarParaTelaPrincipal();
+                                });
                               }
                             } else {
-                                this.setState({ carregando : false }, () => { this.retornarParaTelaPrincipal() })
+                              this.setState({ carregando: false }, () => {
+                                this.retornarParaTelaPrincipal();
+                              });
                             }
                           });
-                        });
-                      });
-                    }
-                  );
-                });
+                        }
+                      );
+                    });
+                  }
+                );
               });
-            }
-          );
-    },
-    error => {},
-    {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000})
-
-
-/*     navigator.geolocation.getCurrentPosition(position => {
-
-    }); */
+            });
+          }
+        );
+      },
+      error => {},
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
+    );
   }
 
   removerImagem(index) {
@@ -248,7 +266,7 @@ class FinalizarViabilidade extends Component {
             </Item>
 
             <Item
-              style={{marginVertical : 35}}
+              style={{ marginVertical: 35 }}
               onPress={() => {
                 this.setState({
                   roteadorCliente: !this.state.roteadorCliente
@@ -256,7 +274,7 @@ class FinalizarViabilidade extends Component {
               }}
             >
               <CheckBox
-                style={{marginVertical : 10}}
+                style={{ marginVertical: 10 }}
                 color="#1B8332"
                 checked={this.state.roteadorCliente}
                 onPress={() => {

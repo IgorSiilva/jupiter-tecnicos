@@ -62,8 +62,8 @@ class Ordens extends Component {
     Orientation.lockToPortrait();
 
     //habilita o network no debugger
-    GLOBAL.XMLHttpRequest =
-      GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
+    // GLOBAL.XMLHttpRequest =
+    //   GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
 
     this.buscarOrdensNoDb = this.buscarOrdensNoDb.bind(this);
     this.checarOrdensEmAndamento = this.checarOrdensEmAndamento.bind(this);

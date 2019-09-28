@@ -116,8 +116,12 @@ class Assinatura extends Component {
                               body: JSON.stringify({ ...OS[0], imagens })
                             }
                           ).then(response => {
-                            removerOS(dados.ordem).then(() => {
-                              removerFotos(dados.ordem.idatendimento);
+                            response.json().then(data => {
+                              if (data.success == "1") {
+                                removerOS(dados.ordem).then(() => {
+                                  removerFotos(dados.ordem.idatendimento);
+                                });
+                              }
                             });
                           });
                         }
