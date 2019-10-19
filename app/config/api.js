@@ -30,7 +30,7 @@ export const obterTerminaisV2 = (latitude, longitude, distancia) => {
 /*   return axios.get(`${API_URL}/retornarTerminaisProximosV2?latitude=${latitude}&longitude=${longitude}&distancia=${distancia}`)
     .then(response => response.data) */
   return fetch(`${API_URL}/retornarTerminaisProximosV2?latitude=${latitude}&longitude=${longitude}&distancia=${distancia}`, {
-      method: "GET"
+      method: "GET",
   })
     .then(response => response.json())   
 }

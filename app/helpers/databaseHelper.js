@@ -34,15 +34,18 @@ const finalizarViabilidade = async(dados, usuario) => {
 }
 
 const inserirOS = async (dados) => {
-    db.transaction((tx) => {
+    db.transaction((tx, results) => {
         tx.executeSql(`INSERT INTO OS (id, idordem, servico, nomecliente, tipo_servico, endereco, sistema) VALUES (${dados.id}, "${dados.idordem}", "${dados.servico}", "${dados.nomecliente}", ${dados.tipo_servico}, "${dados.endereco}", "${dados.sistema}")`, [], (tx, results) => {
         });
+        console.log(results)
     });
 }
 
 const removerOS = async (dados) => {
+    console.log(dados)
     db.transaction((tx) => {
         tx.executeSql(`DELETE FROM OS WHERE idordem = ${dados.idordem}`, [], (tx, results) => {
+            console.log(results)
         });
     });
 }

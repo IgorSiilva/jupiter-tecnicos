@@ -52,7 +52,6 @@ export default class App extends Component {
   }
 
   onIds(device) {
-    console.log(device)
     AsyncStorage.setItem("usuarioid", device.userId)
   }
   

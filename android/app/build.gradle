@@ -124,8 +124,8 @@ android {
                                 onesignal_google_project_number: "REMOTE"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "2.5"
+        versionCode 19
+        versionName "2.6"
         // ndk {
         //     abiFilters "armeabi-v7a", "x86"
         // }

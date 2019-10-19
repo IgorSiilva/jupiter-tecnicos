@@ -14,13 +14,22 @@ import { Button, Text } from "native-base";
 import Orientation from "react-native-orientation";
 import { StackActions, NavigationActions } from "react-navigation";
 import { apiUrl } from "../../config/api";
-import {
+/* import {
   finalizarAtendimento,
   removerOS,
   buscarOSEspecifica,
   salvarFoto,
   removerFotos
-} from "../../helpers/databaseHelper";
+} from "../../helpers/databaseHelper"; */
+
+import {
+    salvarFoto,
+    finalizarAtendimento,
+    removerOS,
+    removerFotos,
+    buscarOSEspecifica,
+    buscarImagemOS
+  } from "../../helpers/databaseHelper";
 const SQLite = require("react-native-sqlite-storage");
 
 class Assinatura extends Component {
@@ -81,11 +90,64 @@ class Assinatura extends Component {
     this.refs["sign"].resetImage();
   }
 
+  async verificarConexaoInternet() {
+    return NetInfo.getConnectionInfo().then(status => {
+      if (status.type == "wifi" /* || status.type == "cellular" */) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
   _onSaveEvent(assinatura) {
     AsyncStorage.getItem("usuario").then(usuario => {
       const dados = this.props.navigation.state.params.dados;
       finalizarAtendimento(dados, assinatura.encoded, usuario).then(() => {
-        salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
+        buscarOSEspecifica(dados.ordem.idordem).then(OS => {
+            buscarImagemOS(dados.ordem.idatendimento).then(
+              imagens => {
+                this.verificarConexaoInternet().then(conexao => {
+                  if (conexao) {
+                    try {
+                      fetch(
+                        `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
+                        {
+                          method: "POST",
+                          body: JSON.stringify({ ...OS[0], imagens })
+                        }
+                      ).then(response => {
+                        removerOS(dados.ordem).then(() => {
+                            removerFotos(
+                              dados.ordem.idatendimento
+                            ).then(() => {
+
+                            });
+                        });
+                        response.json().then((data) => {
+                            if (data.success == "1") {
+                                removerOS(dados.ordem).then(() => {
+                                    removerFotos(
+                                      dados.ordem.idatendimento
+                                    ).then(() => {
+        
+                                    });
+                                });
+                            } else {
+                          }
+                        })
+                      });
+                    } catch (error) {
+
+                    }
+                  } else {
+
+                  }
+                });
+              }
+            );
+          });
+/*         salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
           NetInfo.getConnectionInfo().then(statusNetwork => {
             if (
               statusNetwork.type == "wifi" //||
@@ -116,7 +178,8 @@ class Assinatura extends Component {
                               body: JSON.stringify({ ...OS[0], imagens })
                             }
                           ).then(response => {
-                            response.json().then(data => {
+                            response.json().then((data) => {
+                                console.log(data)
                               if (data.success == "1") {
                                 removerOS(dados.ordem).then(() => {
                                   removerFotos(dados.ordem.idatendimento);
@@ -132,7 +195,7 @@ class Assinatura extends Component {
               });
             }
           });
-        });
+        }); */
 
         const reset = StackActions.reset({
           index: 0,

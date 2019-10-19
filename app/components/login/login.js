@@ -16,11 +16,12 @@ import {
   StatusBar
 } from "react-native";
 import { styles } from "./loginStyles";
-import { loginUrl } from "../../config/api";
+import { loginUrl, apiUrl } from "../../config/api";
 import Icon from "react-native-vector-icons/EvilIcons";
 import { StackActions, NavigationActions } from "react-navigation";
 import Orientation from "react-native-orientation";
 import OneSignal from "react-native-onesignal"; // Import package from node modules
+import { inserirOS } from "../../helpers/databaseHelper";
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -69,15 +70,27 @@ class LoginScreen extends Component {
         )
           .then(response => response.json())
           .then(response => {
-            console.log(response);
             if (response.success == "1") {
               AsyncStorage.setItem("usuario", this.state.user).then(() => {
                 //reseta o stack e não deixa o usuario retornar para o login
-                const resetAction = StackActions.reset({
-                  index: 0,
-                  actions: [NavigationActions.navigate({ routeName: "Ordens" })]
-                });
-                this.props.navigation.dispatch(resetAction);
+
+                fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${this.state.user}`).then(response => response.json()).then(response => {
+                    const result = response.ordensdeservico.map( async (ordem) => {
+                        if(ordem.status == "0") {
+                            inserirOS(ordem)
+                        }
+                    })
+
+                    Promise.all(result).then(() => {
+                        const resetAction = StackActions.reset({
+                            index: 0,
+                            actions: [NavigationActions.navigate({ routeName: "Ordens" })]
+                          });
+                          this.props.navigation.dispatch(resetAction);
+                    })
+                })
+
+
               });
             } else {
               this.setState({
@@ -91,13 +104,11 @@ class LoginScreen extends Component {
               showSpinner: false
             });
             Alert.alert("Erro", "Não foi possivel conectar");
-            console.log(error);
           });
       });
     } catch (error) {
       Alert.alert("Erro", "Não foi possivel conectar");
 
-      console.log(error);
       this.setState({
         showSpinner: false
       });

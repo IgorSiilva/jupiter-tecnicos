@@ -62,8 +62,8 @@ class Ordens extends Component {
     Orientation.lockToPortrait();
 
     //habilita o network no debugger
-    // GLOBAL.XMLHttpRequest =
-    //   GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
+/*     GLOBAL.XMLHttpRequest =
+      GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest; */
 
     this.buscarOrdensNoDb = this.buscarOrdensNoDb.bind(this);
     this.checarOrdensEmAndamento = this.checarOrdensEmAndamento.bind(this);
@@ -79,7 +79,6 @@ class Ordens extends Component {
   }
 
   onReceived(notificacao) {
-    console.log(notificacao.payload.additionalData)
     const novaOS = notificacao.payload.additionalData;
     if (novaOS.acao == "remover") {
     /* if (novaOS.status == "1") { */
@@ -87,6 +86,7 @@ class Ordens extends Component {
         this.buscarOrdensNoDb();
       });
     } else {
+        console.log(notificacao.payload.additionalData)
       inserirOS(notificacao.payload.additionalData).then(() => {
         //console.log(notificacao.payload);
         this.buscarOrdensNoDb();
@@ -98,7 +98,7 @@ class Ordens extends Component {
     const db = SQLite.openDatabase({ name: "OS", createFromLocation: "1" });
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM OS", [], (tx, results) => {
-        //console.log(results.rows.raw());
+        console.log(results.rows.raw());
         this.setState(
           {
             ordens: results.rows.raw()
@@ -120,7 +120,8 @@ class Ordens extends Component {
   }
 
   finalizarAtendimento(idordem, nome, servico, id, tipo_servico) {
-    if(tipo_servico	 == 5) { 
+    if(tipo_servico	 == 5) {
+
         this.props.navigation.navigate("Mapa", {
             idordem: idordem,
             nome: nome,
@@ -128,6 +129,7 @@ class Ordens extends Component {
             idatendimento: id,
             tipo_servico : tipo_servico
           });
+    
     } else {
         this.props.navigation.navigate("FinalizarAtendimento", {
             idordem: idordem,
