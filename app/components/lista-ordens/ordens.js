@@ -52,13 +52,24 @@ class Ordens extends Component {
                     state.params.navigation.dispatch(resetAction);
                   });
                 } else {
+
                   AsyncStorage.getItem("usuario").then(usuario => {
-                    fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=alacid`).then(response => response.json()).then(response => {
-                      response.ordensdeservico.map((ordem) => {
+                    fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`).then(response => response.json()).then(response => {
+                      const result = response.ordensdeservico.map(async (ordem) => {
                         if(JSON.parse(ordem.supervisao).fimatendimento != "") {
                           removerOS(ordem)
                         }
-                      })                    
+                      })
+                      
+                      Promise.all(result).then((completed) => {
+                        const resetAction = StackActions.reset({
+                          index: 0,
+                          actions: [
+                            NavigationActions.navigate({ routeName: "Ordens" })
+                          ]
+                        });
+                        state.params.navigation.dispatch(resetAction);
+                      })
                     })
                   })
                 }
@@ -75,6 +86,8 @@ class Ordens extends Component {
   constructor(props) {
     super(props);
     this.state = { ordemEmAndamento: false, ordens: [] };
+    this.props.navigation.setParams({ buscarOrdensNoDb: this.buscarOrdensNoDb });
+
     Orientation.lockToPortrait();
 
     //habilita o network no debugger
@@ -88,7 +101,6 @@ class Ordens extends Component {
 
     this.buscarOrdensNoDb();
   }
-
   componentWillMount() {
     const { setParams } = this.props.navigation;
     setParams({ navigation: this.props.navigation });
@@ -116,7 +128,7 @@ class Ordens extends Component {
     AsyncStorage.getItem("usuario").then(usuario => {
       db.transaction(tx => {
         tx.executeSql(`SELECT * FROM OS WHERE usuariofo = '${usuario}'`, [], (tx, results) => {
-          console.log(results.rows.raw());
+          
           this.setState(
             {
               ordens: results.rows.raw()

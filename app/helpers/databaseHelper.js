@@ -35,12 +35,17 @@ const finalizarViabilidade = async(dados, usuario) => {
 }
 
 const inserirOS = async (dados) => {
-    AsyncStorage.getItem("usuario").then(usuario => {
+    const usuario = await AsyncStorage.getItem("usuario")
+    if(usuario !== null) {
+/*         AsyncStorage.getItem("usuario").then(usuario => {
+
+        }) */
         db.transaction((tx, results) => {
             tx.executeSql(`INSERT INTO OS (id, idordem, servico, nomecliente, tipo_servico, endereco, sistema, usuariofo) VALUES (${dados.id}, "${dados.idordem}", "${dados.servico}", "${dados.nomecliente}", ${dados.tipo_servico}, "${dados.endereco}", "${dados.sistema}", "${usuario}")`, [], (tx, results) => {
             });
         });
-    })
+    }
+
 
 }
 
