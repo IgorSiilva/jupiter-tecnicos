@@ -76,7 +76,7 @@ class LoginScreen extends Component {
 
                 fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${this.state.user}`).then(response => response.json()).then(response => {
                     const result = response.ordensdeservico.map( async (ordem) => {
-                        if(ordem.status == "0") {
+                        if(ordem.status == "0" && JSON.parse(ordem.supervisao).fimatendimento == "") {
                             inserirOS(ordem)
                         }
                     })

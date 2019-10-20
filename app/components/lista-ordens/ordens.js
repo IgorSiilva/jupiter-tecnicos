@@ -12,6 +12,7 @@ import {
   ActionSheet,
   Root
 } from "native-base";
+import { apiUrl } from "../../config/api";
 
 import { styles } from "./ordensStyle";
 import Orientation from "react-native-orientation";
@@ -33,22 +34,37 @@ class Ordens extends Component {
       return {
         headerRight: (
           <PopupMenu
-            actions={["Sair"]}
+            actions={["Sair", 'Sincronizar']}
             onPress={(e, i) => {
               console.log(e);
+              console.log(i);
               if (e == "dismissed") {
                 //
               } else {
-                AsyncStorage.removeItem("usuario").then(() => {
-                  const resetAction = StackActions.reset({
-                    index: 0,
-                    actions: [
-                      NavigationActions.navigate({ routeName: "Login" })
-                    ]
+                if(i == 0) {
+                  AsyncStorage.removeItem("usuario").then(() => {
+                    const resetAction = StackActions.reset({
+                      index: 0,
+                      actions: [
+                        NavigationActions.navigate({ routeName: "Login" })
+                      ]
+                    });
+                    state.params.navigation.dispatch(resetAction);
                   });
-                  state.params.navigation.dispatch(resetAction);
-                });
+                } else {
+                  AsyncStorage.getItem("usuario").then(usuario => {
+                    fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=alacid`).then(response => response.json()).then(response => {
+                      response.ordensdeservico.map((ordem) => {
+                        if(JSON.parse(ordem.supervisao).fimatendimento != "") {
+                          removerOS(ordem)
+                        }
+                      })                    
+                    })
+                  })
+                }
               }
+
+
             }}
           />
         )
@@ -96,17 +112,30 @@ class Ordens extends Component {
 
   buscarOrdensNoDb() {
     const db = SQLite.openDatabase({ name: "OS", createFromLocation: "1" });
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM OS", [], (tx, results) => {
-        console.log(results.rows.raw());
-        this.setState(
-          {
-            ordens: results.rows.raw()
-          },
-          () => this.checarOrdensEmAndamento()
-        );
+
+    AsyncStorage.getItem("usuario").then(usuario => {
+      db.transaction(tx => {
+        tx.executeSql(`SELECT * FROM OS WHERE usuariofo = '${usuario}'`, [], (tx, results) => {
+          console.log(results.rows.raw());
+          this.setState(
+            {
+              ordens: results.rows.raw()
+            },
+            () => this.checarOrdensEmAndamento()
+          );
+        });
       });
-    });
+    })
+
+  }
+
+  sincronizarDB() {
+    AsyncStorage.getItem("usuario").then(usuario => {
+      fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`).then(response => response.json()).then(response => {
+        console.log(usuario)
+      })
+    })
+
   }
 
   iniciarAtendimento(idordem, nome, servico, idatendimento, tipo_servico) {

@@ -1,4 +1,5 @@
 const SQLite = require('react-native-sqlite-storage')
+import { AsyncStorage } from "react-native";
 
 const db = SQLite.openDatabase({ name: "OS", createFromLocation: "1" });
 
@@ -34,19 +35,18 @@ const finalizarViabilidade = async(dados, usuario) => {
 }
 
 const inserirOS = async (dados) => {
-    db.transaction((tx, results) => {
-        tx.executeSql(`INSERT INTO OS (id, idordem, servico, nomecliente, tipo_servico, endereco, sistema) VALUES (${dados.id}, "${dados.idordem}", "${dados.servico}", "${dados.nomecliente}", ${dados.tipo_servico}, "${dados.endereco}", "${dados.sistema}")`, [], (tx, results) => {
+    AsyncStorage.getItem("usuario").then(usuario => {
+        db.transaction((tx, results) => {
+            tx.executeSql(`INSERT INTO OS (id, idordem, servico, nomecliente, tipo_servico, endereco, sistema, usuariofo) VALUES (${dados.id}, "${dados.idordem}", "${dados.servico}", "${dados.nomecliente}", ${dados.tipo_servico}, "${dados.endereco}", "${dados.sistema}", "${usuario}")`, [], (tx, results) => {
+            });
         });
-        console.log(results)
-    });
+    })
+
 }
 
 const removerOS = async (dados) => {
-    console.log(dados)
     db.transaction((tx) => {
-        tx.executeSql(`DELETE FROM OS WHERE idordem = ${dados.idordem}`, [], (tx, results) => {
-            console.log(results)
-        });
+        tx.executeSql(`DELETE FROM OS WHERE idordem = ${dados.idordem}`, [], (tx, results) => {});
     });
 }
 
