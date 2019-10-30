@@ -3,6 +3,8 @@ import { AppStackNavigator } from "./app/config/routes";
 import OneSignal from 'react-native-onesignal'; // Import package from node modules
 import { AsyncStorage } from "react-native";
 import {removerOS} from "./app/helpers/databaseHelper"
+import * as Sentry from '@sentry/react-native';
+
 
 
 
@@ -16,6 +18,13 @@ export default class App extends Component {
     super(props)
 
     OneSignal.init("afa88f7c-f17f-4a24-bac1-40977fbadaf8");
+    Sentry.init({ 
+        dsn: 'https://1c77b348d1cd4a9d84d40840ceecfcaa@sentry.io/1797069', 
+    });
+
+    Sentry.nativeCrash();
+
+
 
     OneSignal.addEventListener('received', this.onReceived);
     OneSignal.addEventListener('opened', this.onOpened);
@@ -56,6 +65,7 @@ export default class App extends Component {
   }
   
   render() {
+
     return <AppStackNavigator />;
   }
 }

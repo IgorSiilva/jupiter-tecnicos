@@ -49,7 +49,7 @@ class FinalizarAtendimento extends Component {
       cpfDoAssinante: "",
       imagens: [],
       caixasAtendimento: [],
-      caixaAtendimentoSelecionada : ''
+      caixaAtendimentoSelecionada: ""
     };
 
     Orientation.lockToPortrait();
@@ -64,33 +64,35 @@ class FinalizarAtendimento extends Component {
   }
 
   onSelectCaixa(value) {
-      this.setState({
-          caixaAtendimentoSelecionada : value
-      })
+    this.setState({
+      caixaAtendimentoSelecionada: value
+    });
   }
 
   componentDidMount() {
     if (this.props.navigation.state.params.tipo_servico == 5) {
-
     }
   }
 
   finalizarAtendimento(props) {
     if (
       (this.state.pendente == false && this.state.concluido == false) ||
-      (this.state.historico == "")
+      this.state.historico == ""
     ) {
       Alert.alert("Erro", "Preencha os dados");
     } else {
-        Geolocation.getCurrentPosition(position => {
-      /* navigator.geolocation.getCurrentPosition(position => { */
+      Geolocation.getCurrentPosition(position => {
+        /* navigator.geolocation.getCurrentPosition(position => { */
         this.setState(
           {
             posicao: position.coords
           },
           () => {
             let data = new Date();
-            let formatedDate = data.toISOString().split("T")[0] + " " + data.toLocaleTimeString();
+            let formatedDate =
+              data.toISOString().split("T")[0] +
+              " " +
+              data.toLocaleTimeString();
             const dados = {
               ordem: props.navigation.state.params,
               posicao: this.state.posicao,
@@ -103,8 +105,11 @@ class FinalizarAtendimento extends Component {
               presencaDoTitular: this.state.presencaDoTitular,
               acessoRemotoHabilitado: this.state.acessoRemotoHabilitado,
               imagens: this.state.imagens,
-              caixaAtendimentoSelecionada : props.navigation.state.params.terminalSelecionado == undefined ? "" : props.navigation.state.params.terminalSelecionado.codigo, 
-              fotoDoMapa : props.navigation.state.params.fotoDoMapa
+              caixaAtendimentoSelecionada:
+                props.navigation.state.params.terminalSelecionado == undefined
+                  ? ""
+                  : props.navigation.state.params.terminalSelecionado.codigo,
+              fotoDoMapa: props.navigation.state.params.fotoDoMapa
             };
             this.props.navigation.navigate("Assinatura", { dados });
           }
@@ -146,7 +151,7 @@ class FinalizarAtendimento extends Component {
         <StatusBar backgroundColor="#F78154" barStyle="light-content" />
         <Content>
           <Form style={{ width: "95%" }}>
-            <Item floatingLabel style={styles.textarea}>
+            <Item regular style={styles.textarea}>
               <Input
                 placeholder="Relatorio do Atendimento"
                 onChangeText={historico => {
@@ -304,7 +309,6 @@ class FinalizarAtendimento extends Component {
                     })}
               </Picker>
             </Item>
-    
 
             {this.state.presencaDoTitular ? (
               <View />
@@ -389,6 +393,15 @@ class FinalizarAtendimento extends Component {
               <Text> Assinatura do Cliente </Text>
             </Button>
           </View>
+
+          {this.props.navigation.state.params.terminalSelecionado !==
+          undefined ? (
+            <Text style={{ fontSize: 11, marginTop: 15, textAlign: "center" }}>
+              Distância aproximada do terminal selecionado : { this.props.navigation.state.params.terminalSelecionado.distancia }
+            </Text>
+          ) : (
+            <Text />
+          )}
         </Content>
       </Container>
     );

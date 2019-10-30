@@ -34,14 +34,12 @@ class Ordens extends Component {
       return {
         headerRight: (
           <PopupMenu
-            actions={["Sair", 'Sincronizar']}
+            actions={["Sair", "Sincronizar"]}
             onPress={(e, i) => {
-              console.log(e);
-              console.log(i);
               if (e == "dismissed") {
                 //
               } else {
-                if(i == 0) {
+                if (i == 0) {
                   AsyncStorage.removeItem("usuario").then(() => {
                     const resetAction = StackActions.reset({
                       index: 0,
@@ -52,30 +50,75 @@ class Ordens extends Component {
                     state.params.navigation.dispatch(resetAction);
                   });
                 } else {
-
                   AsyncStorage.getItem("usuario").then(usuario => {
-                    fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`).then(response => response.json()).then(response => {
-                      const result = response.ordensdeservico.map(async (ordem) => {
-                        if(JSON.parse(ordem.supervisao).fimatendimento != "") {
-                          removerOS(ordem)
+                    fetch(
+                      `${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`
+                    )
+                      .then(response => response.json())
+                      .then(response => {
+                        if (response.ordensdeservico.length == 0) {
+                          const db = SQLite.openDatabase({
+                            name: "OS",
+                            createFromLocation: "1"
+                          });
+
+                          AsyncStorage.getItem("usuario").then(usuario => {
+                            db.transaction(tx => {
+                              tx.executeSql(
+                                `SELECT * FROM OS WHERE usuariofo = '${usuario}'`,
+                                [],
+                                (tx, results) => {
+                                  results.rows.raw().map(ordem => {
+                                    removerOS(ordem);
+                                  });
+                                }
+                              );
+                            });
+                          });
+                        } else {
+                          const result = response.ordensdeservico.map(
+                            async ordem => {
+                              if (ordem.supervisao !== "") {
+                                let supervisao = JSON.parse(ordem.supervisao);
+                                if (
+                                  supervisao.fimatendimento != "" &&
+                                  supervisao.fimatendimento != undefined
+                                ) {
+                                  removerOS(ordem);
+                                } else {
+                                  if (
+                                    ordem.status == "0" &&
+                                    (supervisao.fimatendimento == "" ||
+                                      supervisao.fimatendimento == undefined)
+                                  ) {
+                                    inserirOS(ordem);
+                                  }
+                                }
+                              } else if (
+                                ordem.supervisao == "" &&
+                                ordem.status == "0"
+                              ) {
+                                inserirOS(ordem);
+                              }
+                            }
+                          );
                         }
-                      })
-                      
-                      Promise.all(result).then((completed) => {
-                        const resetAction = StackActions.reset({
-                          index: 0,
-                          actions: [
-                            NavigationActions.navigate({ routeName: "Ordens" })
-                          ]
+
+                        Promise.all(result).then(completed => {
+                          const resetAction = StackActions.reset({
+                            index: 0,
+                            actions: [
+                              NavigationActions.navigate({
+                                routeName: "Ordens"
+                              })
+                            ]
+                          });
+                          state.params.navigation.dispatch(resetAction);
                         });
-                        state.params.navigation.dispatch(resetAction);
-                      })
-                    })
-                  })
+                      });
+                  });
                 }
               }
-
-
             }}
           />
         )
@@ -86,12 +129,14 @@ class Ordens extends Component {
   constructor(props) {
     super(props);
     this.state = { ordemEmAndamento: false, ordens: [] };
-    this.props.navigation.setParams({ buscarOrdensNoDb: this.buscarOrdensNoDb });
+    this.props.navigation.setParams({
+      buscarOrdensNoDb: this.buscarOrdensNoDb
+    });
 
     Orientation.lockToPortrait();
 
     //habilita o network no debugger
-/*     GLOBAL.XMLHttpRequest =
+    /*     GLOBAL.XMLHttpRequest =
       GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest; */
 
     this.buscarOrdensNoDb = this.buscarOrdensNoDb.bind(this);
@@ -109,12 +154,11 @@ class Ordens extends Component {
   onReceived(notificacao) {
     const novaOS = notificacao.payload.additionalData;
     if (novaOS.acao == "remover") {
-    /* if (novaOS.status == "1") { */
+      /* if (novaOS.status == "1") { */
       removerOS(novaOS).then(() => {
         this.buscarOrdensNoDb();
       });
     } else {
-        console.log(notificacao.payload.additionalData)
       inserirOS(notificacao.payload.additionalData).then(() => {
         //console.log(notificacao.payload);
         this.buscarOrdensNoDb();
@@ -127,31 +171,35 @@ class Ordens extends Component {
 
     AsyncStorage.getItem("usuario").then(usuario => {
       db.transaction(tx => {
-        tx.executeSql(`SELECT * FROM OS WHERE usuariofo = '${usuario}'`, [], (tx, results) => {
-          
-          this.setState(
-            {
-              ordens: results.rows.raw()
-            },
-            () => this.checarOrdensEmAndamento()
-          );
-        });
+        tx.executeSql(
+          `SELECT * FROM OS WHERE usuariofo = '${usuario}'`,
+          [],
+          (tx, results) => {
+            this.setState(
+              {
+                ordens: results.rows.raw()
+              },
+              () => this.checarOrdensEmAndamento()
+            );
+          }
+        );
       });
-    })
-
+    });
   }
 
   sincronizarDB() {
     AsyncStorage.getItem("usuario").then(usuario => {
-      fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`).then(response => response.json()).then(response => {
-        console.log(usuario)
-      })
-    })
-
+      fetch(
+        `${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${usuario}`
+      )
+        .then(response => response.json())
+        .then(response => {
+        });
+    });
   }
 
   iniciarAtendimento(idordem, nome, servico, idatendimento, tipo_servico) {
-     this.props.navigation.navigate("InicioAtendimento", {
+    this.props.navigation.navigate("InicioAtendimento", {
       idordem: idordem,
       nome: nome,
       servico: servico,
@@ -161,26 +209,23 @@ class Ordens extends Component {
   }
 
   finalizarAtendimento(idordem, nome, servico, id, tipo_servico) {
-    if(tipo_servico	 == 5) {
-
-        this.props.navigation.navigate("Mapa", {
-            idordem: idordem,
-            nome: nome,
-            servico: servico,
-            idatendimento: id,
-            tipo_servico : tipo_servico
-          });
-    
+    if (tipo_servico == 5) {
+      this.props.navigation.navigate("Mapa", {
+        idordem: idordem,
+        nome: nome,
+        servico: servico,
+        idatendimento: id,
+        tipo_servico: tipo_servico
+      });
     } else {
-        this.props.navigation.navigate("FinalizarAtendimento", {
-            idordem: idordem,
-            nome: nome,
-            servico: servico,
-            idatendimento: id,
-            tipo_servico : tipo_servico
-          });
+      this.props.navigation.navigate("FinalizarAtendimento", {
+        idordem: idordem,
+        nome: nome,
+        servico: servico,
+        idatendimento: id,
+        tipo_servico: tipo_servico
+      });
     }
-
   }
 
   continuarAtendimentoViabilidade(idordem, nome, servico, idatendimento) {
@@ -291,7 +336,7 @@ class Ordens extends Component {
                             block
                             style={styles.button}
                             onPress={() => {
-                                this.cancelarAtendimento(ordem.idordem)
+                              this.cancelarAtendimento(ordem.idordem);
                             }}
                           >
                             <Text>Cancelar Atendimento</Text>

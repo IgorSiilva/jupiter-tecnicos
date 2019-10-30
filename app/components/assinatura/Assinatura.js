@@ -23,13 +23,13 @@ import { apiUrl } from "../../config/api";
 } from "../../helpers/databaseHelper"; */
 
 import {
-    salvarFoto,
-    finalizarAtendimento,
-    removerOS,
-    removerFotos,
-    buscarOSEspecifica,
-    buscarImagemOS
-  } from "../../helpers/databaseHelper";
+  salvarFoto,
+  finalizarAtendimento,
+  removerOS,
+  removerFotos,
+  buscarOSEspecifica,
+  buscarImagemOS
+} from "../../helpers/databaseHelper";
 const SQLite = require("react-native-sqlite-storage");
 
 class Assinatura extends Component {
@@ -104,50 +104,40 @@ class Assinatura extends Component {
     AsyncStorage.getItem("usuario").then(usuario => {
       const dados = this.props.navigation.state.params.dados;
       finalizarAtendimento(dados, assinatura.encoded, usuario).then(() => {
-        buscarOSEspecifica(dados.ordem.idordem).then(OS => {
-            buscarImagemOS(dados.ordem.idatendimento).then(
-              imagens => {
-                this.verificarConexaoInternet().then(conexao => {
-                  if (conexao) {
-                    try {
-                      fetch(
-                        `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
-                        {
-                          method: "POST",
-                          body: JSON.stringify({ ...OS[0], imagens })
+        salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
+          buscarOSEspecifica(dados.ordem.idordem).then(OS => {
+            buscarImagemOS(dados.ordem.idatendimento).then(imagens => {
+              this.verificarConexaoInternet().then(conexao => {
+                if (conexao) {
+                  try {
+                    fetch(
+                      `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
+                      {
+                        method: "POST",
+                        body: JSON.stringify({ ...OS[0], imagens, versao : '2.9' })
+                      }
+                    ).then(response => {
+
+                      response.json().then(data => {
+                        if (data.success == "1") {
+                          removerOS(dados.ordem).then(() => {
+                            removerFotos(dados.ordem.idatendimento).then(
+                              () => {}
+                            );
+                          });
+                        } else {
                         }
-                      ).then(response => {
-                        removerOS(dados.ordem).then(() => {
-                            removerFotos(
-                              dados.ordem.idatendimento
-                            ).then(() => {
-
-                            });
-                        });
-                        response.json().then((data) => {
-                            if (data.success == "1") {
-                                removerOS(dados.ordem).then(() => {
-                                    removerFotos(
-                                      dados.ordem.idatendimento
-                                    ).then(() => {
-        
-                                    });
-                                });
-                            } else {
-                          }
-                        })
                       });
-                    } catch (error) {
-
-                    }
-                  } else {
-
-                  }
-                });
-              }
-            );
+                    });
+                  } catch (error) {}
+                } else {
+                }
+              });
+            });
           });
-/*         salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
+        });
+
+        /*         salvarFoto(dados.ordem.idatendimento, dados.imagens).then(() => {
           NetInfo.getConnectionInfo().then(statusNetwork => {
             if (
               statusNetwork.type == "wifi" //||

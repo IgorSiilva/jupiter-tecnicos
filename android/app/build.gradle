@@ -98,6 +98,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
+apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -124,8 +125,8 @@ android {
                                 onesignal_google_project_number: "REMOTE"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 19
-        versionName "2.6"
+        versionCode 23
+        versionName "3"
         // ndk {
         //     abiFilters "armeabi-v7a", "x86"
         // }
@@ -175,6 +176,7 @@ android {
 }
 
 dependencies {
+    implementation project(':@sentry_react-native')
     compile project(':react-native-geolocation-service')
     compile project(':react-native-fs')
     compile project(':react-native-image-picker')

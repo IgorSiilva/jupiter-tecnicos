@@ -164,20 +164,48 @@ class Mapa extends Component {
   }
 
   tracarRotaParaTerminal(terminal, quantidadeTerminaisSelecionados) {
+    this.setState({
+        carregando : true
+    })
+
     const { latitude, longitude } = terminal;
     const LATITUDE = 1;
     const LONGITUDE = 0;
 
-    this.setState(
+    obterRotaEntreDoisPontos(
+        {
+          latitude: this.state.coordenadasDispositivo.latitude,
+          longitude: this.state.coordenadasDispositivo.longitude
+        },
+        {
+          latitude: latitude,
+          longitude: longitude
+        }
+      ).then(response => {
+        this.setState(
+          {
+            rotaParaTerminal: response.routes[0].geometry.coordinates,
+            carregando: false,
+            terminalSelecionado: {...terminal, distancia : response.routes[0].distance},
+            posicaoTerminalSelecionado: { latitude, longitude },
+            codigoTerminalSelecionado: terminal.codigo
+          }
+        );
+    });
+
+/*     this.setState(
       {
         carregando: true,
         terminalSelecionado: terminal,
         posicaoTerminalSelecionado: { latitude, longitude },
         codigoTerminalSelecionado: terminal.codigo
       }
-    );
+    ); */
 
-    obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
+
+
+
+/*     obterCoordenadaMaisProxima({ latitude, longitude }).then(response => {
       const coordenadaTerminal = response.waypoints[0].location; // [longitude, latitude]
       obterCoordenadaMaisProxima(this.state.coordenadasDispositivo).then(
         response => {
@@ -201,7 +229,7 @@ class Mapa extends Component {
           });
         }
       );
-    });
+    }); */
   }
 
   render() {

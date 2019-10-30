@@ -40,6 +40,7 @@ class LoginScreen extends Component {
   }
 
   login() {
+
     //OneSignal.configure()
     //habilita o network no debugger
     // GLOBAL.XMLHttpRequest =
@@ -73,11 +74,17 @@ class LoginScreen extends Component {
             if (response.success == "1") {
               AsyncStorage.setItem("usuario", this.state.user).then(() => {
                 //reseta o stack e não deixa o usuario retornar para o login
-
                 fetch(`${apiUrl}/api/view/OrdensDeServico/retornarOrdensDeServicoComTecnicoJSON?tecnico=${this.state.user}`).then(response => response.json()).then(response => {
                     const result = response.ordensdeservico.map( async (ordem) => {
-                        if(ordem.status == "0" && JSON.parse(ordem.supervisao).fimatendimento == "") {
-                            inserirOS(ordem)
+                        if(ordem.status == "0") {
+                            try {
+                                let supervisao = JSON.parse(ordem.supervisao)
+                                if(supervisao.fimatendimento == "" || supervisao.fimatendimento == undefined) {
+                                    inserirOS(ordem)
+                                }
+                            } catch (error) {
+                                inserirOS(ordem)
+                            }
                         }
                     })
 

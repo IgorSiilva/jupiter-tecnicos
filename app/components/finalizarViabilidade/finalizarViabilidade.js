@@ -79,7 +79,6 @@ class FinalizarViabilidade extends Component {
       quality: 0.5
     };
     ImagePicker.launchCamera(options, response => {
-        console.log(response)
       if (response.didCancel != true) {
         this.setState(
           {
@@ -160,7 +159,7 @@ class FinalizarViabilidade extends Component {
                                   `${apiUrl}/api/action/OrdemDeServico/salvarAtendimentoOrdemDeServico`,
                                   {
                                     method: "POST",
-                                    body: JSON.stringify({ ...OS[0], imagens })
+                                    body: JSON.stringify({ ...OS[0], imagens, versao : '2.9' })
                                   }
                                 ).then(response => {
                                     response.json().then((data) => {
