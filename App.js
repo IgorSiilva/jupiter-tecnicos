@@ -22,7 +22,7 @@ export default class App extends Component {
         dsn: 'https://1c77b348d1cd4a9d84d40840ceecfcaa@sentry.io/1797069', 
     });
 
-    Sentry.nativeCrash();
+    //Sentry.nativeCrash();
 
 
 
